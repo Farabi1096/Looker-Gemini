@@ -56,6 +56,32 @@
             height: 100%;
             min-width: 1rem; /* Minimum width for visibility */
         }
+        
+        /* --- NEW TAB STYLES --- */
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; /* rounded-lg */
+            font-weight: 500;
+            font-size: 0.875rem; /* text-sm */
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .tab-active {
+            background-color: white;
+            color: #11998e; /* Match header green */
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-inactive {
+            background-color: transparent;
+            color: #f4f7f9; /* Light text */
+            opacity: 0.8;
+        }
+        .tab-inactive:hover {
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -74,6 +100,18 @@
                 <!-- Dropdowns will be dynamically inserted here by JavaScript -->
             </div>
         </header>
+
+        <!-- NEW TAB CONTROLS -->
+        <div class="flex justify-center mb-6 -mt-4 z-10 relative">
+            <div class="flex p-1 bg-gray-700/30 rounded-lg shadow-md backdrop-blur-sm">
+                <button id="tab-territory" class="tab-button tab-active">
+                    Territory Update
+                </button>
+                <button id="tab-db" class="tab-button tab-inactive">
+                    DB Update
+                </button>
+            </div>
+        </div>
 
         <!-- KPI Cards Section (5 Cards) -->
         <div id="kpi-cards" class="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-10">
@@ -137,86 +175,98 @@
 
         </div>
 
-        <!-- Section 3: Detailed Territory Table -->
-        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed Territory Performance MTD</h2>
+        <!-- TAB PANELS WRAPPER -->
+        <div id="tab-panels">
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Territory</th>
-                            
-                            <!-- STT (Sales to Trade) -->
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                            
-                            <!-- ERC (Effective Reach Coverage) - REMOVED (Count) -->
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
+            <!-- Panel 1: Territory (Visible by default) -->
+            <div id="panel-territory" style="display: block;">
+                <!-- Section 3: Detailed Territory Table -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed Territory Performance MTD</h2>
 
-                            <!-- SF TBR (Sales Force Target Business Review) - REMOVED (Count) -->
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
-                            
-                            <!-- Premium SKU - REMOVED (Count) -->
-                            <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                            <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                        </tr>
-                    </thead>
-                    <tbody id="territory-list" class="bg-white divide-y divide-gray-200">
-                        <!-- Data will be populated here by JavaScript -->
-                    </tbody>
-                    <!-- Grand Total Row will be appended here by JS -->
-                </table>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Territory</th>
+                                    
+                                    <!-- STT (Sales to Trade) -->
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
+                                    
+                                    <!-- ERC (Effective Reach Coverage) - REMOVED (Count) -->
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
+
+                                    <!-- SF TBR (Sales Force Target Business Review) - REMOVED (Count) -->
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
+                                    
+                                    <!-- Premium SKU - REMOVED (Count) -->
+                                    <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
+                                    <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="territory-list" class="bg-white divide-y divide-gray-200">
+                                <!-- Data will be populated here by JavaScript -->
+                            </tbody>
+                            <!-- Grand Total Row will be appended here by JS -->
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <!-- Section 4: Detailed DB Table -->
-        <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DB Performance MTD</h2>
+            
+            <!-- Panel 2: DB (Hidden by default) -->
+            <div id="panel-db" style="display: none;">
+                <!-- Section 4: Detailed DB Table -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DB Performance MTD</h2>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DB Name</th>
-                            
-                            <!-- STT (Sales to Trade) -->
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                            
-                            <!-- ERC (Effective Reach Coverage) - REMOVED (Count) -->
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DB Name</th>
+                                    
+                                    <!-- STT (Sales to Trade) -->
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
+                                    
+                                    <!-- ERC (Effective Reach Coverage) - REMOVED (Count) -->
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
 
-                            <!-- SF TBR (Sales Force Target Business Review) - REMOVED (Count) -->
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
-                            
-                            <!-- Premium SKU - REMOVED (Count) -->
-                            <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                            <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                        </tr>
-                    </thead>
-                    <tbody id="db-list" class="bg-white divide-y divide-gray-200">
-                        <!-- Data will be populated here by JavaScript -->
-                    </tbody>
-                    <!-- Grand Total Row will be appended here by JS -->
-                </table>
+                                    <!-- SF TBR (Sales Force Target Business Review) - REMOVED (Count) -->
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
+                                    
+                                    <!-- Premium SKU - REMOVED (Count) -->
+                                    <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
+                                    <th scope="col" scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
+                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="db-list" class="bg-white divide-y divide-gray-200">
+                                <!-- Data will be populated here by JavaScript -->
+                            </tbody>
+                            <!-- Grand Total Row will be appended here by JS -->
+                        </table>
+                    </div>
+                </div>
             </div>
-        </div>
+        </div> <!-- End of Tab Panels Wrapper -->
     </div>
 
     <script>
+        // --- (FIXED) ALL FUNCTIONS DEFINED *BEFORE* THEY ARE CALLED ---
+
         // --- GLOBAL DATA & BENCHMARKS ---
         const timeElapsedPercent = 42.31; // Benchmark set to Nov 12th (11/26 days)
         const LAC_DIVISOR = 100000;
@@ -228,7 +278,6 @@
             'DB Name': 'All DBs'
         };
 
-
         // UPDATED: Filter options dynamically extracted from #DSR-MTD Update.csv
         const filterOptions = {
             'Area': ['All Areas', 'CTG', 'DHAKA'],
@@ -236,8 +285,7 @@
             'DB Name': ['All DBs', 'Karim Trading', 'ARC Trading', 'M/S Farid Enterprise', 'P M Traders', 'Madina Traders', 'Takwa Enterprise', 'Unitrust Trading Co.', 'Paragon Marketing Limited', 'Self Tech Marketing Ltd', 'M/S Sanuar Enterprise', 'M/S Hasan Brothers Corporation', 'M/S Hasan Brothers Corporation 2'],
         };
         
-        // --- FULL SOURCE DATA (RENAME to avoid confusion with dynamic data) ---
-        // Data from #Territory Overview.csv (6 territories)
+        // --- FULL SOURCE DATA ---
         const fullTerritoryData = [
             { 
                 territory: "DHAKA EAST", tm: "MESBA RAHMAN", area: "DHAKA", dhName: "Takwa Enterprise", 
@@ -300,7 +348,7 @@
         ];
 
         
-        // --- HELPER FUNCTIONS (DEFINED FIRST TO PREVENT ReferenceError) ---
+        // --- HELPER FUNCTIONS (DEFINED FIRST) ---
 
         function getRAGStatus(percentage) {
             if (percentage >= timeElapsedPercent) {
@@ -407,7 +455,7 @@
                     actualValue: kpiTotalERC.toFixed(2) + "%"
                 },
                 sfTbr: {
-                    label: "SF TBR Ach", 
+                    label: "SF TBR Vol.", // <-- UPDATED LABEL
                     percentage: (kpiTotalTBRTgt > 0) ? (kpiTotalTBRAch / kpiTotalTBRTgt) * 100 : 0, // Calculate % dynamically for card display
                     unit: "TBRs",
                     target: kpiTotalTBRTgt, 
@@ -467,7 +515,7 @@
                     mainValue = kpi.percentage.toFixed(2) + '%'; 
                     mainValueClass = rag.textColor; 
                     
-                } else if (kpi.label.includes('SF TBR Ach')) {
+                } else if (kpi.label.includes('SF TBR Vol.')) { // <-- UPDATED LABEL CHECK
                     mainValue = formatCount(achieved);
                     mainValueClass = rag.textColor;
                 } else {
@@ -477,7 +525,21 @@
 
                 const displayUnit = unit === "Lac" ? "Lac" : "";
 
-                let baseContent = `
+                // --- UPDATED to hide TGT and Balance for SF TBR Vol. ---
+                let baseContent = ''; 
+
+                if (kpi.label.includes('SF TBR Vol.')) {
+                    // Special content for SF TBR Vol. (Only Achieved)
+                    baseContent = `
+                        <!-- Achieved -->
+                        <div class="flex justify-between items-center text-gray-600">
+                            <span class="text-xs font-medium">Achieved:</span>
+                            <span class="font-bold text-sm ${rag.textColor}">${fmtAchieved}</span>
+                        </div>
+                    `;
+                } else {
+                    // Original content for all other cards
+                    baseContent = `
                         <!-- Target -->
                         <div class="flex justify-between items-center text-gray-600">
                             <span class="text-xs font-medium">TGT (${displayUnit}):</span>
@@ -493,8 +555,9 @@
                             <span class="text-xs font-medium">Balance:</span>
                             <span class="font-bold text-sm ${balance >= 0 ? 'text-gray-400' : 'text-red-500'}">${fmtBalance}</span>
                         </div>
-                `;
-
+                    `;
+                }
+                // --- END OF UPDATE ---
                 
                 if (comparisonText) {
                     subContent = `
@@ -699,7 +762,6 @@
             });
         }
 
-        // (FIXED) ADDED updateDbStatus function definition
         function updateDbStatus(dbDataArray) {
             const dbHealthContainer = document.getElementById('db-health');
             if (!dbHealthContainer) return;
@@ -723,9 +785,9 @@
             dbHealthContainer.innerHTML = `
                 <h3 class="text-md font-semibold text-gray-700 mb-2">DB Status (Total: ${total})</h3>
                 <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                    <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct}%;">${green > 0 ? green : ''}</div>
-                    <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct}%; ${amberPct > 0 ? '' : 'min-width: 1.5rem;'}">${amber}</div> 
-                    <div class="chart-bar fill-red text-center text-white p-1" style="width: ${redPct}%;">${red > 0 ? red : ''}</div>
+                    <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct.toFixed(2)}%;">${green > 0 ? green : ''}</div>
+                    <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct.toFixed(2)}%; ${amberPct > 0 || amber == 0 ? 'min-width: 1.5rem;' : ''}">${amber}</div> 
+                    <div class="chart-bar fill-red text-center text-white p-1" style="width: ${redPct.toFixed(2)}%;">${red > 0 ? red : ''}</div>
                 </div>
                 <div class="flex justify-between text-xs mt-1">
                     <span class="text-green">Above 90%: ${green}</span>
@@ -771,7 +833,7 @@
                 // If a specific Area is selected (but not Territory or DB), KPIs reflect that Area
                 dataForKpiTotals = filteredTerritories;
             } else {
-                // If no filters are active, KPIs reflect the full company summary
+                // If no filters are active, KPIs reflect the full company summary (using territory data as base)
                 dataForKpiTotals = fullTerritoryData; 
             }
 
@@ -819,7 +881,7 @@
                         // (Future enhancement: dynamically repopulate Territory/DB lists based on Area)
                     } else if (filterName === 'Territory') {
                         selectedFilters['DB Name'] = 'All DBs';
-                        // (Future enhancement: dynamically repopulate DB list based on Territory)
+                        // (Future enhancement: dynamically repopLulate DB list based on Territory)
                     }
                     
                     applyFilters(); // Trigger filtering and re-rendering
@@ -835,6 +897,35 @@
                 wrapper.appendChild(label);
                 wrapper.appendChild(select);
                 filterControls.appendChild(wrapper);
+            });
+        }
+        
+        function initializeTabs() {
+            const tabTerritory = document.getElementById('tab-territory');
+            const tabDb = document.getElementById('tab-db');
+            const panelTerritory = document.getElementById('panel-territory');
+            const panelDb = document.getElementById('panel-db');
+
+            tabTerritory.addEventListener('click', () => {
+                // Show Territory Panel
+                panelTerritory.style.display = 'block';
+                panelDb.style.display = 'none';
+                // Set Tab Styles
+                tabTerritory.classList.add('tab-active');
+                tabTerritory.classList.remove('tab-inactive');
+                tabDb.classList.add('tab-inactive');
+                tabDb.classList.remove('tab-active');
+            });
+
+            tabDb.addEventListener('click', () => {
+                // Show DB Panel
+                panelTerritory.style.display = 'none';
+                panelDb.style.display = 'block';
+                // Set Tab Styles
+                tabDb.classList.add('tab-active');
+                tabDb.classList.remove('tab-inactive');
+                tabTerritory.classList.add('tab-inactive');
+                tabTerritory.classList.remove('tab-active');
             });
         }
 
@@ -853,6 +944,7 @@
             populateTerritoryChart(fullTerritoryData);
             updateDbStatus(fullDbData); // (FIXED) Initial dynamic load of DB status
             initializeFilters(); 
+            initializeTabs(); // (FIXED) Initialize tab switching logic
         });
     </script>
 </body>
