@@ -112,7 +112,7 @@
             <div class="mb-4 xl:mb-0">
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white">SPARTA MTD Sales Performance</h1>
                 <!-- UPDATED DATE -->
-                <p class="text-lg text-gray-200 mt-1">(Data as of Nov 17th, 2025)</p>
+                <p class="text-lg text-gray-200 mt-1">(Data as of Nov 18th, 2025)</p>
             </div>
             
             <!-- Filter Dropdowns Section (Compact layout) -->
@@ -187,7 +187,7 @@
                 <!-- Territory STT Achievement Chart (Visible by default) -->
                 <div id="territory-chart-container" style="display: block;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Territory STT Achievement vs. Target</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span> (Ranked by Achievement)</p>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">61.54%</span> (Ranked by Achievement)</p>
                     <div id="stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
                     </div>
@@ -196,7 +196,7 @@
                 <!-- DB STT Achievement Chart (Hidden by default) -->
                 <div id="db-chart-container" style="display: none;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target (Aggregated)</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span> (Ranked by Achievement)</p>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">61.54%</span> (Ranked by Achievement)</p>
                     <div id="db-stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
                     </div>
@@ -210,7 +210,7 @@
             <!-- Top 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span></p>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">61.54%</span></p>
                 <div id="top-10-sr-chart" class="space-y-4">
                     <!-- Top 10 SRs populated by JS -->
                 </div>
@@ -219,7 +219,7 @@
             <!-- Bottom 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span></p>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">61.54%</span></p>
                 <div id="bottom-10-sr-chart" class="space-y-4">
                     <!-- Bottom 10 SRs populated by JS -->
                 </div>
@@ -336,7 +336,7 @@
         // --- (FIXED) ALL FUNCTIONS DEFINED *BEFORE* THEY ARE CALLED ---
 
         // --- GLOBAL DATA & BENCHMARKS ---
-        const timeElapsedPercent = 57.69; // UPDATED: Benchmark set to Nov 18th (15/26 days)
+        const timeElapsedPercent = 61.54; // UPDATED: 16/26 days * 100 = 61.54%
         const LAC_DIVISOR = 100000;
         
         // Object to track current selections
@@ -484,15 +484,15 @@
         }
 
         function getRAGStatus(percentage) {
-            // 90% of Time Elapsed = 57.69% * 0.9 = 51.921%
+            // 90% of Time Elapsed = 61.54% * 0.9 = 55.386%
             const benchmarkHigh = timeElapsedPercent * 0.90;
-            // 85% of Time Elapsed = 57.69% * 0.85 = 49.0365%
+            // 85% of Time Elapsed = 61.54% * 0.85 = 52.309%
             const benchmarkLow = timeElapsedPercent * 0.85;
 
             // Updated RAG logic:
-            // Green: >= 90% of Time Elapsed (>= 51.921%)
-            // Amber: 85% - 90% of Time Elapsed (49.0365% - 51.9209%)
-            // Red: < 85% of Time Elapsed (< 49.0365%)
+            // Green: >= 90% of Time Elapsed (>= 55.386%)
+            // Amber: 85% - 90% of Time Elapsed (52.309% - 55.385%)
+            // Red: < 85% of Time Elapsed (< 52.309%)
             
             if (percentage >= benchmarkHigh) { 
                 return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
@@ -558,7 +558,7 @@
                 timeElapsed: {
                     label: "Time Elapsed", 
                     percentage: timeElapsedPercent,
-                    valueText: "15 out of 26 Working Days Passed", // UPDATED
+                    valueText: "16 out of 26 Working Days Passed", // UPDATED TEXT
                     rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' },
                     isBenchmark: true
                 },
@@ -1237,7 +1237,7 @@
             ["Md Arshad", 30], ["Md Forhad", 30], ["Md Shojibul Islam", 30], ["Md Ariful Islam", 30]
         ]);
 
-        // NEW RAW DATASET (43 records)
+        // LATEST RAW DATASET (43 records)
         const rawSrData = [
             { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550,000", mtdAch: "355,089", ercTgt: "426", ercAch: "277", sfTbrAch: "3", premiumSkuAch: "38" },
             { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700,000", mtdAch: "349,971", ercTgt: "437", ercAch: "288", sfTbrAch: "6", premiumSkuAch: "23" },
