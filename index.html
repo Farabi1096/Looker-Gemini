@@ -77,11 +77,30 @@
             background-color: transparent;
             color: #f4f7f9; /* Light text */
             opacity: 0.8;
+            border-color: rgba(255, 255, 255, 0.2);
         }
         .tab-inactive:hover {
             opacity: 1;
             background-color: rgba(255, 255, 255, 0.1);
         }
+        
+        /* Fix for sticky column alignment in table */
+        @media (min-width: 1024px) {
+            .min-w-full th:first-child,
+            .min-w-full td:first-child {
+                position: sticky;
+                left: 0;
+                z-index: 10;
+                box-shadow: 2px 0 3px -1px rgba(0, 0, 0, 0.05); /* subtle shadow for separation */
+            }
+            .min-w-full td:first-child {
+                background-color: white;
+            }
+            .min-w-full tfoot td:first-child {
+                 background-color: #f3f4f6; /* Gray-100 */
+            }
+        }
+        
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -97,7 +116,7 @@
             </div>
             
             <!-- Filter Dropdowns Section (Compact layout) -->
-            <div id="filter-controls" class="flex flex-wrap gap-2 p-2 header-gradient rounded-lg shadow-lg border border-gray-400">
+            <div id="filter-controls" class="flex flex-wrap gap-2 p-2 bg-gray-900/10 rounded-lg shadow-inner border border-gray-400">
                 <!-- Dropdowns will be dynamically inserted here by JavaScript -->
             </div>
         </header>
@@ -133,7 +152,7 @@
                 <p class="text-sm text-gray-500 mb-4">No. of performers Above 90%, 85-90%, and Below 85% of Time elapsed %.</p>
                 
                 <!-- SR Status: This will be dynamically updated by updateSrStatus() -->
-                <div id="sr-health" class="mb-4">
+                <div id="sr-health" class="mb-6 border-b pb-4 border-gray-100">
                     <h3 class="text-md font-semibold text-gray-700 mb-2">SR Status (Total: 0)</h3>
                     <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
                         <div class="chart-bar fill-green text-center text-white p-1" style="width: 0%;">0</div>
@@ -176,7 +195,7 @@
 
                 <!-- DB STT Achievement Chart (Hidden by default) -->
                 <div id="db-chart-container" style="display: none;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target</h2>
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target (Aggregated)</h2>
                     <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span> (Ranked by Achievement)</p>
                     <div id="db-stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
@@ -190,7 +209,7 @@
             
             <!-- Top 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 SR Nationally (by STT Ach %)</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 DFF Nationally (by STT Ach %)</h2>
                 <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span></p>
                 <div id="top-10-sr-chart" class="space-y-4">
                     <!-- Top 10 SRs populated by JS -->
@@ -199,7 +218,7 @@
             
             <!-- Bottom 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 SR (by STT Ach %)</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 DFF Nationally (by STT Ach %)</h2>
                 <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">57.69%</span></p>
                 <div id="bottom-10-sr-chart" class="space-y-4">
                     <!-- Bottom 10 SRs populated by JS -->
@@ -221,7 +240,7 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Territory</th>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">Territory</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
@@ -248,14 +267,14 @@
             <!-- Panel 2: DB (Hidden by default) -->
             <div id="panel-db" style="display: none;">
                 <!-- Section 4: Detailed DB Table -->
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DB Performance MTD</h2>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DB Performance MTD (Aggregated)</h2>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DB Name</th>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">DB Name</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
@@ -282,14 +301,14 @@
             <!-- Panel 3: SR (Hidden by default) -->
             <div id="panel-sr" style="display: none;">
                 <!-- Section 5: Detailed SR Table -->
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed SR Performance MTD</h2>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DFF Performance MTD</h2>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DFF Name</th>
+                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">DFF Name</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
                                     <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
@@ -394,22 +413,24 @@
             
             // If the changed filter was Area, update Territory dropdown AND reset it
             if (changedFilterName === 'Area') {
+                // Update select options but DON'T reset selectedFilters.Territory yet. We rely on populateSelectWithOptions to reset if needed.
                 populateSelectWithOptions(territorySelect, availableTerritories, 'Territory');
-                selectedFilters.Territory = 'All Territories'; // Reset territory
+                selectedFilters.Territory = territorySelect.value; // Update global state based on final selection
             }
 
             // Filter by Territory (if selected)
+            let availableSrsForDb = [...availableSrs]; // Start fresh from Area filter result
             if (selectedFilters.Territory !== 'All Territories') {
-                availableSrs = availableSrs.filter(sr => sr.territory === selectedFilters.Territory);
+                availableSrsForDb = availableSrsForDb.filter(sr => sr.territory === selectedFilters.Territory);
             }
 
             // Get available DBs from the *area- and territory-filtered* SR list
-            const availableDbNames = ['All DBs', ...new Set(availableSrs.map(item => item.dhName).sort())];
+            const availableDbNames = ['All DBs', ...new Set(availableSrsForDb.map(item => item.dhName).sort())];
 
-            // If changed filter was Area or Territory, update DB dropdown AND reset it
+            // If changed filter was Area or Territory, update DB dropdown
             if (changedFilterName === 'Area' || changedFilterName === 'Territory') {
                 populateSelectWithOptions(dbNameSelect, availableDbNames, 'DB Name');
-                selectedFilters['DB Name'] = 'All DBs'; // Reset DB
+                selectedFilters['DB Name'] = dbNameSelect.value; // Update global state based on final selection
             }
         }
 
@@ -463,27 +484,27 @@
         }
 
         function getRAGStatus(percentage) {
-            // 90% of Time Elapsed = 57.69% * 0.9 = 51.92%
+            // 90% of Time Elapsed = 57.69% * 0.9 = 51.921%
             const benchmarkHigh = timeElapsedPercent * 0.90;
-            // 85% of Time Elapsed = 57.69% * 0.85 = 49.04%
+            // 85% of Time Elapsed = 57.69% * 0.85 = 49.0365%
             const benchmarkLow = timeElapsedPercent * 0.85;
 
             // Updated RAG logic:
-            // Green: >= 90% of Time Elapsed (>= 51.92%)
-            // Amber: 85% - 90% of Time Elapsed (49.04% - 51.91%)
-            // Red: < 85% of Time Elapsed (< 49.04%)
+            // Green: >= 90% of Time Elapsed (>= 51.921%)
+            // Amber: 85% - 90% of Time Elapsed (49.0365% - 51.9209%)
+            // Red: < 85% of Time Elapsed (< 49.0365%)
             
-            if (percentage >= benchmarkHigh) { // >= 51.92%
+            if (percentage >= benchmarkHigh) { 
                 return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
-            } else if (percentage >= benchmarkLow) { // >= 49.04%
+            } else if (percentage >= benchmarkLow) { 
                 return { color: 'fill-amber', text: 'Amber', ring: 'ring-amber', textColor: 'text-amber' };
-            } else { // < 49.04%
+            } else { 
                 return { color: 'fill-red', text: 'Red', ring: 'ring-red', textColor: 'text-red' };
             }
         }
 
         function formatInLac(amount) {
-            return (amount / LAC_DIVISOR).toFixed(2);
+            return (amount / LAC_DIVISOR).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function formatCount(amount) {
@@ -494,7 +515,7 @@
         
         function formatValue(value, unit) {
             if (unit === "Lac") { 
-                return (value / LAC_DIVISOR).toFixed(2);
+                return formatInLac(value);
             }
             // All other units are counts
             return formatCount(value);
@@ -508,8 +529,10 @@
 
             dataArray.forEach(data => {
                 for (const key in totals) {
-                    if (data[key] && typeof data[key] === 'number') {
-                        totals[key] += data[key];
+                    // Use parseNumeric to ensure correct aggregation, especially important if the source data wasn't fully cleaned up earlier
+                    const val = parseNumeric(data[key]);
+                    if (!isNaN(val)) {
+                         totals[key] += val;
                     }
                 }
             });
@@ -524,19 +547,12 @@
         }
         
         function updateKpiData(totals) {
-            // Check if filtering is active (i.e., totals are derived from a subset of data)
-            const isFiltered = selectedFilters.Area !== 'All Areas' || selectedFilters.Territory !== 'All Territories' || selectedFilters['DB Name'] !== 'All DBs';
-
-            let kpiTotalSTT, kpiTotalERC, kpiTotalTBRTgt, kpiTotalTBRAch, kpiTotalPSKUTGT, kpiTotalPSKUACH, kpiTotalPSKUACHPercent;
-
             // ALWAYS use the calculated totals from the (potentially filtered) dataArray.
-            kpiTotalSTT = totals.sttAchPercent;
-            kpiTotalERC = totals.ercAchPercent;
-            kpiTotalTBRTgt = totals.sfTbrTgt;
-            kpiTotalTBRAch = totals.sfTbrAch; // For TBR, the main KPI card shows the count
-            kpiTotalPSKUTGT = totals.premiumSkuGoal;
-            kpiTotalPSKUACH = totals.premiumSkuAch;
-            kpiTotalPSKUACHPercent = totals.premiumSkuAchPercent;
+            const kpiTotalSTT = totals.sttAchPercent;
+            const kpiTotalERC = totals.ercAchPercent;
+            const kpiTotalTBRTgt = totals.sfTbrTgt;
+            const kpiTotalTBRAch = totals.sfTbrAch; // For TBR, the main KPI card shows the count
+            const kpiTotalPSKUACHPercent = totals.premiumSkuAchPercent;
             
             const newKpiData = {
                 timeElapsed: {
@@ -577,8 +593,8 @@
                     label: "Premium TP Ach", 
                     percentage: kpiTotalPSKUACHPercent,
                     unit: "Stores",
-                    target: kpiTotalPSKUTGT, 
-                    achieved: kpiTotalPSKUACH, 
+                    target: totals.premiumSkuGoal, 
+                    achieved: totals.premiumSkuAch, 
                     rag: null, 
                     actualValue: kpiTotalPSKUACHPercent.toFixed(2) + "%"
                 }
@@ -596,7 +612,7 @@
             const rag = kpi.rag || getRAGStatus(kpi.percentage);
             
             let mainValue = kpi.actualValue;
-            let subContent = `<p class="text-sm text-gray-500 mt-2 font-medium">${kpi.valueText}</p>`;
+            let subContent = `<p class="text-sm text-gray-500 mt-2 font-medium">${kpi.valueText || ''}</p>`;
             let mainValueClass = rag.textColor;
             let comparisonText = ''; 
 
@@ -610,6 +626,7 @@
                 const fmtAchieved = formatValue(achieved, unit);
                 const fmtBalance = formatValue(balance, unit);
                 
+                // Show comparison text for achievement KPIs
                 if (kpi.label.includes('MTD STT Ach') || kpi.label.includes('MTD ERC Ach') || kpi.label.includes('Premium TP Ach')) {
                     const difference = kpi.percentage - timeElapsedPercent;
                     let diffValue;
@@ -631,9 +648,12 @@
                     mainValue = kpi.percentage.toFixed(2) + '%'; 
                     mainValueClass = rag.textColor; 
                     
-                } else if (kpi.label.includes('SF TBR Vol.')) { // <-- UPDATED LABEL CHECK
+                } else if (kpi.label.includes('SF TBR Vol.')) { // SF TBR Vol. is just a count metric
                     mainValue = formatCount(achieved);
-                    mainValueClass = rag.textColor;
+                    mainValueClass = 'text-gray-800'; // TBR is not RAG-colored based on the current logic.
+                    rag.color = 'fill-gray-400';
+                    rag.ring = 'ring-gray-400';
+
                 } else {
                     mainValue = kpi.percentage.toFixed(2) + '%';
                     mainValueClass = rag.textColor;
@@ -641,16 +661,16 @@
 
                 const displayUnit = unit === "Lac" ? "Lac" : "";
 
-                // --- UPDATED to hide TGT and Balance for SF TBR Vol. ---
+                // --- Base Content Section ---
                 let baseContent = ''; 
 
                 if (kpi.label.includes('SF TBR Vol.')) {
                     // Special content for SF TBR Vol. (Only Achieved)
                     baseContent = `
-                        <!-- Achieved -->
+                        <!-- Achieved (Count) -->
                         <div class="flex justify-between items-center text-gray-600">
                             <span class="text-xs font-medium">Achieved:</span>
-                            <span class="font-bold text-sm ${rag.textColor}">${fmtAchieved}</span>
+                            <span class="font-bold text-sm text-gray-700">${fmtAchieved}</span>
                         </div>
                     `;
                 } else {
@@ -669,11 +689,11 @@
                         <!-- Balance -->
                         <div class="flex justify-between items-center text-gray-600">
                             <span class="text-xs font-medium">Balance:</span>
-                            <span class="font-bold text-sm ${balance >= 0 ? 'text-gray-400' : 'text-red-500'}">${fmtBalance}</span>
+                            <span class="font-bold text-sm ${balance >= 0 ? 'text-gray-500' : 'text-red-500'}">${fmtBalance}</span>
                         </div>
                     `;
                 }
-                // --- END OF UPDATE ---
+                // --- End Base Content ---
                 
                 if (comparisonText) {
                     subContent = `
@@ -756,7 +776,7 @@
                 .forEach(data => {
                 // Auto-calculate percentages for every row
                 data = calculatePercentages(data);
-                            
+                        
                 const sttRag = getRAGStatus(data.sttAchPercent);
                 const ercRag = getRAGStatus(data.ercAchPercent);
                 const tbrRag = getRAGStatus(data.sfTbrAchPercent);
@@ -780,7 +800,7 @@
                         <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.ercTgt)}</td>
                         <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${ercRag.textColor}">${formatCount(data.ercAch)}</td>
                         <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.ercAchPercent)}">${data.ercAchPercent.toFixed(2)}%</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${tbrRag.textColor}">${formatCount(data.sfTbrAch)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900">${formatCount(data.sfTbrAch)}</td>
                         <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.premiumSkuGoal)}</td>
                         <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${pskuRag.textColor}">${formatCount(data.premiumSkuAch)}</td>
                         <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.premiumSkuAchPercent)}">${data.premiumSkuAchPercent.toFixed(2)}%</td>
@@ -835,23 +855,23 @@
                     <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
                 `;
             } else {
-                 totalRow.innerHTML = `
-                    <td class="px-3 py-3 whitespace-nowrap text-sm font-extrabold text-gray-900 sticky left-0 bg-gray-100 shadow-sm z-10">
-                        GRAND TOTAL (${dataArray.length} items)
-                    </td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatInLac(grandTotals.sttTgt)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatInLac(grandTotals.sttAch)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sttAchPercent)}">${grandTotals.sttAchPercent.toFixed(2)}%</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.ercTgt)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.ercAch)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.ercAchPercent)}">${grandTotals.ercAchPercent.toFixed(2)}%</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.sfTbrTgt)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.sfTbrAch)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sfTbrAchPercent)}">${grandTotals.sfTbrAchPercent.toFixed(2)}%</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.premiumSkuGoal)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.premiumSkuAch)}</td>
-                    <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
-                `;
+                    totalRow.innerHTML = `
+                        <td class="px-3 py-3 whitespace-nowrap text-sm font-extrabold text-gray-900 sticky left-0 bg-gray-100 shadow-sm z-10">
+                            GRAND TOTAL (${dataArray.length} items)
+                        </td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatInLac(grandTotals.sttTgt)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatInLac(grandTotals.sttAch)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sttAchPercent)}">${grandTotals.sttAchPercent.toFixed(2)}%</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.ercTgt)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.ercAch)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.ercAchPercent)}">${grandTotals.ercAchPercent.toFixed(2)}%</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.sfTbrTgt)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.sfTbrAch)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sfTbrAchPercent)}">${grandTotals.sfTbrAchPercent.toFixed(2)}%</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.premiumSkuGoal)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.premiumSkuAch)}</td>
+                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
+                    `;
             }
             
             tfoot.appendChild(totalRow);
@@ -899,7 +919,7 @@
                         <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
                             ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
                         </div>
-                        <span class="absolute right-2 text-xs font-bold ${gapColorClass}">
+                        <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
                             GAP: ${formattedGap}
                         </span>
                         <!-- Show percentage outside if bar is too small -->
@@ -951,11 +971,11 @@
                         <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
                             ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
                         </div>
-                        <span class="absolute right-2 text-xs font-bold ${gapColorClass}">
+                        <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
                             GAP: ${formattedGap}
                         </span>
                         <!-- Show percentage outside if bar is too small -->
-                         ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
+                        ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
                     </div>
                 `;
                 chartContainer.appendChild(chartItem);
@@ -968,6 +988,7 @@
             const topContainerParent = topContainer.closest('.lg\\:col-span-1');
             const bottomContainerParent = bottomContainer.closest('.lg\\:col-span-1');
             const topTitle = topContainerParent.querySelector('h2');
+            const bottomTitle = bottomContainerParent.querySelector('h2');
             
             topContainer.innerHTML = '';
             bottomContainer.innerHTML = '';
@@ -975,6 +996,9 @@
             // Update time elapsed text (common for both)
             const topTimeElapsedText = topContainerParent.querySelector('.text-sm');
             if(topTimeElapsedText) topTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
+            const bottomTimeElapsedText = bottomContainerParent.querySelector('.text-sm');
+            if(bottomTimeElapsedText) bottomTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
+
 
             // Check if ANY filter is active
             const isFiltered = selectedFilters.Area !== 'All Areas' || 
@@ -999,7 +1023,7 @@
                 bottomContainerParent.style.display = 'none';
                 
                 // 2. Change Top 10 title
-                topTitle.textContent = 'SR Performance (by STT Ach %)';
+                topTitle.textContent = `DFF Performance in ${selectedFilters['DB Name'] === 'All DBs' ? selectedFilters.Territory : selectedFilters['DB Name']} (by STT Ach %)`;
                 
                 // 3. Populate "Top" chart with ALL SRs for that filter, using their NATIONAL rank
                 sortedSrData.forEach((data, index) => {
@@ -1023,11 +1047,11 @@
                             <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
                                 ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
                             </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass}">
+                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
                                 GAP: ${formattedGap}
                             </span>
                             <!-- Show percentage outside if bar is too small -->
-                             ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
+                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
                         </div>
                     `;
                     topContainer.appendChild(chartItem);
@@ -1037,11 +1061,10 @@
                 // --- NATIONAL VIEW (DEFAULT - NO FILTERS) ---
                 // 1. Show Bottom 10 chart
                 bottomContainerParent.style.display = 'block';
-                const bottomTimeElapsedText = bottomContainerParent.querySelector('.text-sm');
-                if(bottomTimeElapsedText) bottomTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
 
                 // 2. Set default titles
-                topTitle.textContent = 'Top 10 SR Nationally (by STT Ach %)';
+                topTitle.textContent = 'Top 10 DFF Nationally (by STT Ach %)';
+                bottomTitle.textContent = 'Bottom 10 DFF Nationally (by STT Ach %)';
                 
                 // 3. Get Top 10 and Bottom 10
                 const top10 = sortedSrData.slice(0, 10);
@@ -1070,11 +1093,11 @@
                             <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
                                 ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
                             </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass}">
+                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
                                 GAP: ${formattedGap}
                             </span>
                             <!-- Show percentage outside if bar is too small -->
-                             ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
+                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
                         </div>
                     `;
                     topContainer.appendChild(chartItem);
@@ -1100,13 +1123,13 @@
                         <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
                             <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
                             <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                 ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
+                                ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
                             </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass}">
+                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
                                 GAP: ${formattedGap}
                             </span>
                             <!-- Show percentage outside if bar is too small -->
-                             ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
+                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
                         </div>
                     `;
                     bottomContainer.appendChild(chartItem);
@@ -1125,11 +1148,12 @@
             
             const total = srDataArray.length;
 
-            // (FIX) Count the pre-defined status from the data, don't recalculate
+            // (FIX) Count the status from the data after ensuring percentages are calculated
             srDataArray.forEach(sr => {
-                if (sr.performanceStatus === 'Above 90%') green++;
-                else if (sr.performanceStatus === '85-90%') amber++;
-                else red++; // Default to red if 'Below 85%' or undefined
+                 const status = getRAGStatus(sr.sttAchPercent);
+                if (status.text === 'Green') green++;
+                else if (status.text === 'Amber') amber++;
+                else red++;
             });
 
             const greenPct = total > 0 ? (green / total) * 100 : 0;
@@ -1137,7 +1161,7 @@
             const redPct = total > 0 ? (red / total) * 100 : 0;
 
             srHealthContainer.innerHTML = `
-                <h3 class="text-md font-semibold text-gray-700 mb-2">SR Status (Total: ${total})</h3>
+                <h3 class="text-md font-semibold text-gray-700 mb-2">DFF Status (Total: ${total})</h3>
                 <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
                     <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct.toFixed(2)}%;">${green > 0 ? green : ''}</div>
                     <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct.toFixed(2)}%; ${amberPct > 0 || amber == 0 ? 'min-width: 1.5rem;' : ''}">${amber}</div> 
@@ -1191,164 +1215,126 @@
         
         // --- DATA PRE-PROCESSING & AGGREGATION (Run once on load) ---
         
-        // (New arrays based on SR data)
-        let processedTerritoryData = [];
-        let processedDbData = [];
-        
-        // This is the PREVIOUS dataset, used to build a lookup map
-        const oldDataForLookup = [
-            { dffName: "Emon", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation" },
-            { dffName: "Mehedi", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation" },
-            { dffName: "Miraz", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation" },
-            { dffName: "Rubel", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation" },
-            { dffName: "Parvez", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation" },
-            { dffName: "Al Amin", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2" },
-            { dffName: "Hasib", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2" },
-            { dffName: "Siam", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2" },
-            { dffName: "Rabbi", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2" },
-            { dffName: "Forhad", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2" },
-            { dffName: "Nasim", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Asad", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Rony", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Toriqul", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Salim", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Tamim", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Limon", dhCode: "B006", dhName: "Paragon Marketing Limited" },
-            { dffName: "Fahim", dhCode: "B008", dhName: "Self Tech Marketing Ltd" },
-            { dffName: "Alif", dhCode: "B008", dhName: "Self Tech Marketing Ltd" },
-            { dffName: "Mahi", dhCode: "B008", dhName: "Self Tech Marketing Ltd" },
-            { dffName: "Akram", dhCode: "B008", dhName: "Self Tech Marketing Ltd" },
-            { dffName: "Krishno", dhCode: "B008", dhName: "Self Tech Marketing Ltd" },
-            { dffName: "Mohidul islam", dhCode: "B014", dhName: "Unitrust Trading Co." },
-            { dffName: "Abul Kalam", dhCode: "B014", dhName: "Unitrust Trading Co." },
-            { dffName: "MD. Shahed Mia", dhCode: "B014", dhName: "Unitrust Trading Co." },
-            { dffName: "Saiful Islam Siam", dhCode: "B014", dhName: "Unitrust Trading Co." },
-            { dffName: "MD. Iqbal Khan", dhCode: "B014", dhName: "Unitrust Trading Co." },
-            { dffName: "MD. Forhad Hasan", dhCode: "B014", dhName: "Unitrust Trading Co." },
-            { dffName: "Parvez Rifayaz", dhCode: "B002", dhName: "Takwa Enterprise" },
-            { dffName: "Sobuj Hossain", dhCode: "B002", dhName: "Takwa Enterprise" },
-            { dffName: "Borhan Uddin", dhCode: "B002", dhName: "Takwa Enterprise" },
-            { dffName: "Saiful Islam Rohan", dhCode: "B002", dhName: "Takwa Enterprise" },
-            { dffName: "Zahangir Alom", dhCode: "B002", dhName: "Takwa Enterprise" },
-            { dffName: "Hasib", dhCode: "B003", dhName: "M/S Sanuar Enterprise" }, // Note: Duplicate 'Hasib', but this one is in DHAKA SOUTH
-            { dffName: "Sajid", dhCode: "B003", dhName: "M/S Sanuar Enterprise" },
-            { dffName: "Shawon", dhCode: "B003", dhName: "M/S Sanuar Enterprise" },
-            { dffName: "Sunny", dhCode: "B003", dhName: "M/S Sanuar Enterprise" },
-            { dffName: "Alamin", dhCode: "B003", dhName: "M/S Sanuar Enterprise" },
-            { dffName: "Niloy Sarker", dhCode: "B001", dhName: "Karim Trading" },
-            { dffName: "Mahedi Alam", dhCode: "B001", dhName: "Karim Trading" },
-            { dffName: "Probal Mollick", dhCode: "B001", dhName: "Karim Trading" },
-            { dffName: "Ismail Hossain", dhCode: "B001", dhName: "Karim Trading" },
-            { dffName: "Ratul Das", dhCode: "B001", dhName: "Karim Trading" },
-            { dffName: "Arafat Hossain Musa", dhCode: "B010", dhName: "M/S Farid Enterprise" },
-            { dffName: "Tanvir Ahmed", dhCode: "B010", dhName: "M/S Farid Enterprise" },
-            { dffName: "Shakkhor Majumdar", dhCode: "B010", dhName: "M/S Farid Enterprise" },
-            { dffName: "Tipu Das", dhCode: "B009", dhName: "ARC Trading" },
-            { dffName: "MD Abdul Malek", dhCode: "B009", dhName: "ARC Trading" },
-            { dffName: "Aiyas Ibne Abedin", dhCode: "B009", dhName: "ARC Trading" },
-            { dffName: "Md Arshad", dhCode: "B012", dhName: "P M Traders" },
-            { dffName: "Md Forhad", dhCode: "B012", dhName: "P M Traders" },
-            { dffName: "Md Shojibul Islam", dhCode: "B013", dhName: "Madina Traders" },
-            { dffName: "Md Ariful Islam", dhCode: "B013", dhName: "Madina Traders" }
-        ];
+        // Premium SKU Goal Map: Used to inject missing target data for Premium SKU into the raw data
+        const premiumSkuGoalMap = new Map([
+            // DHAKA WEST (M/S Hasan Brothers Corporation) - 43
+            ["Emon", 43], ["Mehedi", 43], ["Miraz", 0], ["Rubel", 43], ["Parvez", 43],
+            // DHAKA WEST (M/S Hasan Brothers Corporation 2) - 44
+            ["Al Amin", 44], ["Hasib", 44], ["Siam", 44], ["Rabbi", 44], ["Forhad", 44],
+            // DHAKA NORTH MIRPUR (Paragon Marketing Limited) - 44, 45
+            ["Nasim", 44], ["Asad", 44], ["Rony", 45], ["Toriqul", 44], ["Salim", 44], ["Tamim", 45], ["Limon", 44],
+            // DHAKA NORTH UTTARA (Self Tech Marketing Ltd) - 44
+            ["Fahim", 44], ["Alif", 44], ["Mahi", 44], ["Akram", 44], ["Krishno", 44],
+            // DHAKA EAST (Unitrust Trading Co. & Takwa Enterprise) - Varies
+            ["Mohidul islam", 45], ["Abul Kalam", 40], ["MD. Shahed Mia", 41], ["Saiful Islam Siam", 44], ["MD. Iqbal Khan", 35], ["MD. Forhad Hasan", 55],
+            ["Parvez Rifayaz", 69], ["Sobuj Hossain", 60], ["Borhan Uddin", 85], ["Saiful Islam Rohan", 50], ["Zahangir Alom", 66],
+            // DHAKA SOUTH (M/S Sanuar Enterprise) - 44
+            ["Hasib", 44], ["Sajid", 44], ["Shawon", 44], ["Sunny", 44], ["Alamin", 44],
+            // CTG NORTH & SOUTH (Karim Trading, M/S Farid Enterprise, ARC Trading, P M Traders, Madina Traders) - Varies
+            ["Niloy Sarker", 40], ["Mahedi Alam", 40], ["Probal Mollick", 40], ["Ismail Hossain", 40], ["Ratul Das", 40],
+            ["Arafat Hossain Musa", 50], ["Tanvir Ahmed", 30], ["Shakkhor Majumdar", 30],
+            ["Tipu Das", 55], ["MD Abdul Malek", 25], ["Aiyas Ibne Abedin", 55],
+            ["Md Arshad", 30], ["Md Forhad", 30], ["Md Shojibul Islam", 30], ["Md Ariful Islam", 30]
+        ]);
 
-        // Create the lookup map
-        const dffNameToDbMap = new Map();
-        oldDataForLookup.forEach(item => {
-            // Use DFF Name as the key, as it's the most reliable unique identifier we have
-            dffNameToDbMap.set(item.dffName, { dhCode: item.dhCode, dhName: item.dhName });
-        });
-
-        // UPDATED: This is the new 53-row dataset from Nov 18th
+        // NEW RAW DATASET (43 records)
         const rawSrData = [
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550,000", sttAch: "339,195", performanceStatus: "Above 90%", ercTgt: "426", ercAch: "256", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "43", premiumSkuAch: "36" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700,000", sttAch: "349,971", performanceStatus: "85-90%", ercTgt: "437", ercAch: "288", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "43", premiumSkuAch: "23" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4,270,000", sttAch: "321,133", performanceStatus: "Below 85%", ercTgt: "187", ercAch: "5", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "0", premiumSkuAch: "0" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "630,000", sttAch: "378,929", performanceStatus: "Above 90%", ercTgt: "396", ercAch: "196", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "43", premiumSkuAch: "3" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580,000", sttAch: "273,623", performanceStatus: "Below 85%", ercTgt: "447", ercAch: "293", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "43", premiumSkuAch: "39" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "980,000", sttAch: "294,731", performanceStatus: "Below 85%", ercTgt: "313", ercAch: "239", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "6" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "640,000", sttAch: "324,781", performanceStatus: "85-90%", ercTgt: "420", ercAch: "274", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "7" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "690,000", sttAch: "454,048", performanceStatus: "Above 90%", ercTgt: "445", ercAch: "281", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "17" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "600,000", sttAch: "313,808", performanceStatus: "Above 90%", ercTgt: "260", ercAch: "228", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "8" },
-            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "650,000", sttAch: "319,996", performanceStatus: "85-90%", ercTgt: "318", ercAch: "231", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "10" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "510,000", sttAch: "140,993", performanceStatus: "Below 85%", ercTgt: "376", ercAch: "90", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "5" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "1,050,000", sttAch: "443,240", performanceStatus: "Below 85%", ercTgt: "456", ercAch: "287", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "8" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1,050,000", sttAch: "506,661", performanceStatus: "Below 85%", ercTgt: "475", ercAch: "170", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "45", premiumSkuAch: "13" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "800,000", sttAch: "169,074", performanceStatus: "Below 85%", ercTgt: "341", ercAch: "97", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "2" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850,000", sttAch: "373,176", performanceStatus: "Below 85%", ercTgt: "352", ercAch: "189", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "3" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1,240,000", sttAch: "455,081", performanceStatus: "Below 85%", ercTgt: "350", ercAch: "191", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "5" },
-            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "850,000", sttAch: "156,467", performanceStatus: "Below 85%", ercTgt: "350", ercAch: "105", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
-            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "630,000", sttAch: "385,086", performanceStatus: "Above 90%", ercTgt: "320", ercAch: "287", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "36" },
-            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "630,000", sttAch: "298,700", performanceStatus: "Below 85%", ercTgt: "381", ercAch: "301", sfTbrTgt: "100", sfTbrAch: "55", premiumSkuGoal: "44", premiumSkuAch: "31" },
-            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "830,000", sttAch: "459,355", performanceStatus: "Above 90%", ercTgt: "320", ercAch: "269", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "26" },
-            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "810,000", sttAch: "507,338", performanceStatus: "Above 90%", ercTgt: "350", ercAch: "243", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "23" },
-            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "520,000", sttAch: "116,389", performanceStatus: "Below 85%", ercTgt: "329", ercAch: "134", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "0" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "730,000", sttAch: "275,185", performanceStatus: "Below 85%", ercTgt: "358", ercAch: "245", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "45", premiumSkuAch: "24" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "776,000", sttAch: "242,915", performanceStatus: "Below 85%", ercTgt: "388", ercAch: "229", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "40", premiumSkuAch: "22" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "817,000", sttAch: "335,068", performanceStatus: "Below 85%", ercTgt: "383", ercAch: "257", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "41", premiumSkuAch: "24" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "723,000", sttAch: "389,703", performanceStatus: "Above 90%", ercTgt: "408", ercAch: "335", sfTbrTgt: "100", sfTbrAch: "10", premiumSkuGoal: "44", premiumSkuAch: "11" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "868,000", sttAch: "322,097", performanceStatus: "Below 85%", ercTgt: "271", ercAch: "218", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "35", premiumSkuAch: "25" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "873,000", sttAch: "351,678", performanceStatus: "Below 85%", ercTgt: "292", ercAch: "209", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "55", premiumSkuAch: "21" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1,085,000", sttAch: "447,748", performanceStatus: "Below 85%", ercTgt: "369", ercAch: "256", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "69", premiumSkuAch: "39" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "723,000", sttAch: "402,228", performanceStatus: "Above 90%", ercTgt: "408", ercAch: "310", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "60", premiumSkuAch: "6" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "922,000", sttAch: "533,591", performanceStatus: "Above 90%", ercTgt: "353", ercAch: "235", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "85", premiumSkuAch: "64" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "649,000", sttAch: "349,334", performanceStatus: "Above 90%", ercTgt: "429", ercAch: "329", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "12" },
-            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1,030,000", sttAch: "493,381", performanceStatus: "Below 85%", ercTgt: "341", ercAch: "302", sfTbrTgt: "100", sfTbrAch: "11", premiumSkuGoal: "66", premiumSkuAch: "8" },
-            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888,000", sttAch: "316,029", performanceStatus: "Below 85%", ercTgt: "394", ercAch: "167", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "8" },
-            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655,000", sttAch: "309,709", performanceStatus: "Below 85%", ercTgt: "382", ercAch: "196", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "15" },
-            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645,000", sttAch: "262,913", performanceStatus: "Below 85%", ercTgt: "382", ercAch: "242", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "24" },
-            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634,000", sttAch: "239,364", performanceStatus: "Below 85%", ercTgt: "360", ercAch: "162", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "0" },
-            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581,000", sttAch: "229,319", performanceStatus: "Below 85%", ercTgt: "381", ercAch: "127", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "5" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "", dffName: "Niloy Sarker", sttTgt: "450,000", sttAch: "0", performanceStatus: "Below 85%", ercTgt: "320", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "", dffName: "Mahedi Alam", sttTgt: "450,000", sttAch: "0", performanceStatus: "Below 85%", ercTgt: "381", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "", dffName: "Probal Mollick", sttTgt: "650,000", sttAch: "0", performanceStatus: "Below 85%", ercTgt: "320", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "", dffName: "Ismail Hossain", sttTgt: "500,000", sttAch: "0", performanceStatus: "Below 85%", ercTgt: "350", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "", dffName: "Ratul Das", sttTgt: "450,000", sttAch: "0", performanceStatus: "Below 85%", ercTgt: "329", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "580,000", sttAch: "178,076", performanceStatus: "Below 85%", ercTgt: "360", ercAch: "247", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "11" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "420,000", sttAch: "72,190", performanceStatus: "Below 85%", ercTgt: "364", ercAch: "125", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "30", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "430,000", sttAch: "173,490", performanceStatus: "Below 85%", ercTgt: "313", ercAch: "220", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "30", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "640,000", sttAch: "310,260", performanceStatus: "Below 85%", ercTgt: "507", ercAch: "325", sfTbrTgt: "100", sfTbrAch: "12", premiumSkuGoal: "55", premiumSkuAch: "4" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1,600,000", sttAch: "592,297", performanceStatus: "Below 85%", ercTgt: "320", ercAch: "123", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "25", premiumSkuAch: "0" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "573,000", sttAch: "246,617", performanceStatus: "Below 85%", ercTgt: "473", ercAch: "292", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "55", premiumSkuAch: "10" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540,000", sttAch: "269,310", performanceStatus: "85-90%", ercTgt: "329", ercAch: "269", sfTbrTgt: "100", sfTbrAch: "13", premiumSkuGoal: "30", premiumSkuAch: "13" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460,000", sttAch: "242,026", performanceStatus: "Above 90%", ercTgt: "361", ercAch: "315", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "9" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "460,000", sttAch: "267,140", performanceStatus: "Above 90%", ercTgt: "299", ercAch: "219", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "10" },
-            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "540,000", sttAch: "264,591", performanceStatus: "Below 85%", ercTgt: "302", ercAch: "229", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "30", premiumSkuAch: "38" }
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550,000", mtdAch: "355,089", ercTgt: "426", ercAch: "277", sfTbrAch: "3", premiumSkuAch: "38" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700,000", mtdAch: "349,971", ercTgt: "437", ercAch: "288", sfTbrAch: "6", premiumSkuAch: "23" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4,270,000", mtdAch: "321,133", ercTgt: "187", ercAch: "5", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "630,000", mtdAch: "390,318", ercTgt: "396", ercAch: "210", sfTbrAch: "1", premiumSkuAch: "3" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580,000", mtdAch: "291,517", ercTgt: "447", ercAch: "315", sfTbrAch: "6", premiumSkuAch: "44" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "980,000", mtdAch: "327,413", ercTgt: "313", ercAch: "254", sfTbrAch: "1", premiumSkuAch: "13" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "640,000", mtdAch: "336,914", ercTgt: "420", ercAch: "289", sfTbrAch: "0", premiumSkuAch: "9" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "690,000", mtdAch: "472,190", ercTgt: "445", ercAch: "310", sfTbrAch: "1", premiumSkuAch: "24" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "600,000", mtdAch: "327,392", ercTgt: "260", ercAch: "232", sfTbrAch: "1", premiumSkuAch: "14" },
+            { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "650,000", mtdAch: "353,952", ercTgt: "318", ercAch: "247", sfTbrAch: "0", premiumSkuAch: "14" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "510,000", mtdAch: "140,993", ercTgt: "376", ercAch: "90", sfTbrAch: "2", premiumSkuAch: "5" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "1,050,000", mtdAch: "471,671", ercTgt: "456", ercAch: "306", sfTbrAch: "3", premiumSkuAch: "9" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1,050,000", mtdAch: "576,130", ercTgt: "475", ercAch: "177", sfTbrAch: "1", premiumSkuAch: "14" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "800,000", mtdAch: "221,525", ercTgt: "341", ercAch: "116", sfTbrAch: "0", premiumSkuAch: "2" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850,000", mtdAch: "384,189", ercTgt: "352", ercAch: "192", sfTbrAch: "2", premiumSkuAch: "3" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1,240,000", mtdAch: "501,514", ercTgt: "350", ercAch: "204", sfTbrAch: "0", premiumSkuAch: "7" },
+            { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "850,000", mtdAch: "177,586", ercTgt: "350", ercAch: "111", sfTbrAch: "4", premiumSkuAch: "5" },
+            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "630,000", mtdAch: "406,749", ercTgt: "320", ercAch: "292", sfTbrAch: "2", premiumSkuAch: "36" },
+            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "630,000", mtdAch: "287,286", ercTgt: "381", ercAch: "301", sfTbrAch: "55", premiumSkuAch: "31" },
+            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "830,000", mtdAch: "494,058", ercTgt: "320", ercAch: "294", sfTbrAch: "5", premiumSkuAch: "28" },
+            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "810,000", mtdAch: "537,634", ercTgt: "350", ercAch: "267", sfTbrAch: "6", premiumSkuAch: "31" },
+            { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "520,000", mtdAch: "116,389", ercTgt: "329", ercAch: "134", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "730,000", mtdAch: "306,026", ercTgt: "358", ercAch: "250", sfTbrAch: "3", premiumSkuAch: "29" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "776,000", mtdAch: "266,884", ercTgt: "388", ercAch: "232", sfTbrAch: "2", premiumSkuAch: "23" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "817,000", mtdAch: "354,635", ercTgt: "383", ercAch: "269", sfTbrAch: "0", premiumSkuAch: "24" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "723,000", mtdAch: "411,743", ercTgt: "408", ercAch: "353", sfTbrAch: "10", premiumSkuAch: "13" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "868,000", mtdAch: "340,787", ercTgt: "271", ercAch: "230", sfTbrAch: "0", premiumSkuAch: "25" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "873,000", mtdAch: "415,655", ercTgt: "292", ercAch: "225", sfTbrAch: "5", premiumSkuAch: "47" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1,085,000", mtdAch: "463,876", ercTgt: "369", ercAch: "267", sfTbrAch: "7", premiumSkuAch: "42" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "723,000", mtdAch: "413,825", ercTgt: "408", ercAch: "313", sfTbrAch: "3", premiumSkuAch: "6" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "922,000", mtdAch: "559,462", ercTgt: "353", ercAch: "262", sfTbrAch: "5", premiumSkuAch: "74" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "649,000", mtdAch: "382,776", ercTgt: "429", ercAch: "349", sfTbrAch: "4", premiumSkuAch: "17" },
+            { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1,030,000", mtdAch: "504,204", ercTgt: "341", ercAch: "311", sfTbrAch: "11", premiumSkuAch: "9" },
+            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888,000", mtdAch: "335,899", ercTgt: "394", ercAch: "190", sfTbrAch: "4", premiumSkuAch: "8" },
+            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655,000", mtdAch: "332,876", ercTgt: "382", ercAch: "204", sfTbrAch: "4", premiumSkuAch: "17" },
+            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645,000", mtdAch: "280,821", ercTgt: "382", ercAch: "260", sfTbrAch: "5", premiumSkuAch: "24" },
+            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634,000", mtdAch: "253,470", ercTgt: "360", ercAch: "182", sfTbrAch: "4", premiumSkuAch: "0" },
+            { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581,000", mtdAch: "241,594", ercTgt: "381", ercAch: "152", sfTbrAch: "5", premiumSkuAch: "5" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B001", dhName: "Karim Trading", dffCode: "", dffName: "Niloy Sarker", sttTgt: "450,000", mtdAch: "0", ercTgt: "320", ercAch: "0", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B001", dhName: "Karim Trading", dffCode: "", dffName: "Mahedi Alam", sttTgt: "450,000", mtdAch: "0", ercTgt: "381", ercAch: "0", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B001", dhName: "Karim Trading", dffCode: "", dffName: "Probal Mollick", sttTgt: "650,000", mtdAch: "0", ercTgt: "320", ercAch: "0", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B001", dhName: "Karim Trading", dffCode: "", dffName: "Ismail Hossain", sttTgt: "500,000", mtdAch: "0", ercTgt: "350", ercAch: "0", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B001", dhName: "Karim Trading", dffCode: "", dffName: "Ratul Das", sttTgt: "450,000", mtdAch: "0", ercTgt: "329", ercAch: "0", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "580,000", mtdAch: "189,641", ercTgt: "360", ercAch: "263", sfTbrAch: "4", premiumSkuAch: "11" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "420,000", mtdAch: "114,513", ercTgt: "364", ercAch: "185", sfTbrAch: "3", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "430,000", mtdAch: "188,065", ercTgt: "313", ercAch: "230", sfTbrAch: "1", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "640,000", mtdAch: "321,349", ercTgt: "507", ercAch: "325", sfTbrAch: "12", premiumSkuAch: "4" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1,600,000", mtdAch: "617,783", ercTgt: "320", ercAch: "123", sfTbrAch: "0", premiumSkuAch: "0" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "573,000", mtdAch: "246,617", ercTgt: "473", ercAch: "292", sfTbrAch: "4", premiumSkuAch: "10" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540,000", mtdAch: "284,774", ercTgt: "329", ercAch: "270", sfTbrAch: "17", premiumSkuAch: "13" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460,000", mtdAch: "250,628", ercTgt: "361", ercAch: "315", sfTbrAch: "3", premiumSkuAch: "13" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "460,000", mtdAch: "279,369", ercTgt: "299", ercAch: "226", sfTbrAch: "4", premiumSkuAch: "11" },
+            { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "540,000", mtdAch: "270,405", ercTgt: "302", ercAch: "234", sfTbrAch: "2", premiumSkuAch: "41" }
         ];
 
-        // We parse the data to ensure all values are numeric
-        // (FIXED) fullSrData is now defined *after* rawSrData
+        // We parse the data to ensure all values are numeric and add targets
         const fullSrData = rawSrData.map(sr => {
             const newSr = {};
-            // Map new data columns to internal object keys
+            // Text fields
             newSr.area = sr.area;
             newSr.territory = sr.territory;
             newSr.tm = sr.tm;
             newSr.lead = sr.lead;
+            newSr.dhCode = sr.dhCode; // Explicitly included in new data
+            newSr.dhName = sr.dhName; // Explicitly included in new data
             newSr.dffCode = sr.dffCode;
             newSr.dffName = sr.dffName;
+            
+            // Numeric metrics mapped and parsed
             newSr.sttTgt = parseNumeric(sr.sttTgt);
-            newSr.sttAch = parseNumeric(sr.sttAch);
-            newSr.performanceStatus = sr.performanceStatus;
+            newSr.sttAch = parseNumeric(sr.mtdAch); // <-- Mapped from mtdAch
+            
             newSr.ercTgt = parseNumeric(sr.ercTgt);
             newSr.ercAch = parseNumeric(sr.ercAch);
-            newSr.sfTbrTgt = parseNumeric(sr.sfTbrTgt);
-            newSr.sfTbrAch = parseNumeric(sr.sfTbrAch);
-            newSr.premiumSkuGoal = parseNumeric(sr.premiumSkuGoal);
-            newSr.premiumSkuAch = parseNumeric(sr.premiumSkuAch);
-
-            // (FIX) Re-add DH Code and DH Name using the lookup map
-            const dbInfo = dffNameToDbMap.get(newSr.dffName) || {};
-            newSr.dhCode = dbInfo.dhCode || "";
-            newSr.dhName = dbInfo.dhName || "Unknown DB";
             
+            // SF TBR Target: Use hardcoded 100 as per previous structure.
+            newSr.sfTbrTgt = 100;
+            newSr.sfTbrAch = parseNumeric(sr.sfTbrAch); // <-- Mapped from sfTbrAch
+            
+            // Premium SKU Goal: Use the lookup map. Default to 40 if DFF name is missing from map.
+            newSr.premiumSkuGoal = premiumSkuGoalMap.get(newSr.dffName) || 40;
+            newSr.premiumSkuAch = parseNumeric(sr.premiumSkuAch); // <-- Mapped from premiumSkuAch
+
             return newSr;
         });
 
-
+        // (New arrays based on SR data)
+        let processedTerritoryData = [];
+        let processedDbData = [];
+        
         function preProcessData() {
-            // 1. Calculate percentages for all detailed SR data
-            fullSrData.forEach(item => calculatePercentages(item));
+            // 1. Calculate percentages for all detailed SR data and determine rank
+            const nationallySortedSrs = [...fullSrData].map(item => calculatePercentages(item)).sort((a, b) => b.sttAchPercent - a.sttAchPercent);
+            nationallySortedSrs.forEach((sr, index) => {
+                sr.nationalRank = index + 1;
+            });
             
             // 2. Aggregate SR data up to the Territory level
             const territoryMap = new Map();
@@ -1359,7 +1345,6 @@
                         territory: sr.territory,
                         tm: sr.tm,
                         area: sr.area,
-                        dhName: sr.dhName, // Note: this will take the DHName of the *first* SR in that territory
                         sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
                         sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
                     });
@@ -1383,7 +1368,7 @@
                     dbMap.set(key, {
                         dhName: sr.dhName,
                         area: sr.area,
-                        territory: sr.territory, // Note: this will take the territory of the *first* SR for that DB
+                        territory: sr.territory,
                         sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
                         sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
                     });
@@ -1406,69 +1391,39 @@
             // Re-calculate percentages for the new aggregated data
             processedTerritoryData.forEach(item => calculatePercentages(item));
             processedDbData.forEach(item => calculatePercentages(item));
-
-            // (NEW) Assign national rank to all SRs
-            const nationallySortedSrs = [...fullSrData].sort((a, b) => b.sttAchPercent - a.sttAchPercent);
-            nationallySortedSrs.forEach((sr, index) => {
-                sr.nationalRank = index + 1;
-            });
         }
 
         
         /**
-         * (FIXED) This function was broken and incomplete.
-         * Restored to full functionality.
+         * The main function to apply all filters and re-render the dashboard.
          */
         function applyFilters() {
             let filteredTerritories = [...processedTerritoryData];
             let filteredDbs = [...processedDbData];
             let filteredSrs = [...fullSrData];
 
-            // 1. Filter by Area
+            // 1. Filter SR data first (most granular)
             if (selectedFilters.Area !== 'All Areas') {
-                filteredTerritories = filteredTerritories.filter(data => data.area === selectedFilters.Area);
-                filteredDbs = filteredDbs.filter(data => data.area === selectedFilters.Area);
                 filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
             }
-
-            // 2. Filter by Territory
             if (selectedFilters.Territory !== 'All Territories') {
-                filteredTerritories = filteredTerritories.filter(data => data.territory === selectedFilters.Territory);
-                filteredDbs = filteredDbs.filter(data => data.territory === selectedFilters.Territory);
                 filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
             }
-
-            // 3. Filter by DB Name (dhName key)
             if (selectedFilters['DB Name'] !== 'All DBs') {
-                // (FIXED) Filter territories based on SR data, not first SR's DH name
-                const matchingTerritories = new Set(filteredSrs.filter(sr => sr.dhName === selectedFilters['DB Name']).map(sr => sr.territory));
-                filteredTerritories = filteredTerritories.filter(t => matchingTerritories.has(t.territory));
-                
-                filteredDbs = filteredDbs.filter(data => data.dhName === selectedFilters['DB Name']);
                 filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
             }
-
-            // Determine which data to use for KPI calculation
-            // (FIXED) Prioritize the most specific filter for KPI totals, regardless of tab.
-            let dataForKpiTotals;
             
-            if (selectedFilters['DB Name'] !== 'All DBs') {
-                // Most specific filter: a single DB is selected.
-                // Use the filtered DB data for totals, even if on Territory tab.
-                dataForKpiTotals = filteredDbs; 
-            } else if (selectedFilters.Territory !== 'All Territories') {
-                // Next specific: a Territory is selected.
-                // Use the filtered Territory data.
-                dataForKpiTotals = filteredTerritories;
-            } else if (selectedFilters.Area !== 'All Areas') {
-                // Next specific: an Area is selected.
-                // Use the filtered Territory data (which is already filtered by Area).
-                dataForKpiTotals = filteredTerritories;
-            } else {
-                // No filters are active. Use the full SR data for a true grand total.
-                dataForKpiTotals = fullSrData;
-            }
+            // 2. Filter aggregated data based on remaining SRs to ensure consistency
+            const activeTerritories = new Set(filteredSrs.map(sr => sr.territory));
+            const activeDbNames = new Set(filteredSrs.map(sr => sr.dhName));
+            
+            filteredTerritories = processedTerritoryData.filter(t => activeTerritories.has(t.territory));
+            filteredDbs = processedDbData.filter(db => activeDbNames.has(db.dhName));
 
+
+            // 3. Determine data for KPI calculation (Use the aggregated totals of the lowest selected level's SRs)
+            let dataForKpiTotals = filteredSrs; // Always aggregate from the final SR list
+            
 
             // 4. Recalculate KPIs based on filtered data
             const totals = calculateGrandTotals(dataForKpiTotals);
@@ -1557,7 +1512,7 @@
                 visualsSr.style.display = 'none';
                 chartTerritory.style.display = 'block';
                 chartDb.style.display = 'none';
-                // Re-apply filters to update KPIs if needed
+                // Re-apply filters to update visual context
                 applyFilters();
             });
             
@@ -1579,7 +1534,7 @@
                 visualsSr.style.display = 'none';
                 chartTerritory.style.display = 'none';
                 chartDb.style.display = 'block';
-                // Re-apply filters to update KPIs
+                // Re-apply filters to update visual context
                 applyFilters();
             });
             
@@ -1599,8 +1554,7 @@
                 // Visuals
                 visualsMain.style.display = 'none';
                 visualsSr.style.display = 'grid';
-                // No need to toggle territory/db charts as they are in the other panel
-                // Re-apply filters to update KPIs
+                // Re-apply filters to update visual context
                 applyFilters();
             });
         }
@@ -1625,8 +1579,8 @@
             populateDbChart(processedDbData); // Use aggregated data
             populateTopBottomSrCharts(fullSrData);
             
-            updateSrStatus(fullSrData); // <-- ADDED
-            updateDbStatus(processedDbData); // <-- RESTORED
+            updateSrStatus(fullSrData);
+            updateDbStatus(processedDbData);
             initializeFilters(); 
             initializeTabs();
         });
