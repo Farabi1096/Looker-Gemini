@@ -759,6 +759,39 @@
                 return newSr;
             });
 
+            // --- UPDATE: Adjust STT Targets to match specific Territory Goals ---
+            const territoryTargetGoals = {
+                "DHAKA EAST": 9198000,
+                "DHAKA NORTH MIRPUR": 6350400,
+                "DHAKA NORTH UTTARA": 3429720,
+                "DHAKA SOUTH": 3402000,
+                "DHAKA WEST": 10290420,
+                "CTG NORTH & SOUTH": 8750000
+            };
+
+            // 1. Calculate current sums from raw SR data
+            const currentTerritorySums = {};
+            fullSrData.forEach(sr => {
+                if (!currentTerritorySums[sr.territory]) currentTerritorySums[sr.territory] = 0;
+                currentTerritorySums[sr.territory] += sr.sttTgt;
+            });
+
+            // 2. Distribute difference to the first SR of each territory to ensure totals match exactly
+            Object.keys(territoryTargetGoals).forEach(terr => {
+                const goal = territoryTargetGoals[terr];
+                const current = currentTerritorySums[terr] || 0;
+                const diff = goal - current;
+                
+                if (diff !== 0) {
+                    // Find the first SR in this territory to apply the adjustment
+                    const sr = fullSrData.find(s => s.territory === terr);
+                    if (sr) {
+                        sr.sttTgt += diff;
+                    }
+                }
+            });
+            // --------------------------------------------------------------------
+
             let processedTerritoryData = [];
             let processedDbData = [];
             
