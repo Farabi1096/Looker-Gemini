@@ -136,7 +136,7 @@
             <div class="mb-4 xl:mb-0">
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white">SPARTA MTD Sales Performance</h1>
                 <!-- UPDATED DATE -->
-                <p class="text-lg text-gray-200 mt-1">(Data as of Nov 22nd, 2025)</p>
+                <p class="text-lg text-gray-200 mt-1">(Data as of Nov 23rd, 2025)</p>
             </div>
             
             <!-- Filter Dropdowns Section (Compact layout) -->
@@ -384,7 +384,7 @@
         // Register the DataLabels plugin
         Chart.register(ChartDataLabels);
 
-        const timeElapsedPercent = 73.08; // Benchmark updated to (19/26 days)
+        const timeElapsedPercent = 76.92; // Benchmark updated to (20/26 days)
         const LAC_DIVISOR = 100000;
         
         // Object to track current selections
@@ -480,7 +480,7 @@
             let comboChartInstance = null;
             let globalSttAch = 0;
             
-            // --- CHART DATA (NEW DATA) ---
+            // --- CHART DATA (NEW DATA from User Input) ---
             const dailyRawData = [
                 { calday: "11/1/2025", sales: 132114, erc: 97 },
                 { calday: "11/1/2025", sales: 111705, erc: 95 },
@@ -673,64 +673,76 @@
                 { calday: "11/22/2025", sales: 12398, erc: 11 },
                 { calday: "11/22/2025", sales: 29283, erc: 31 },
                 { calday: "11/22/2025", sales: 104886, erc: 165 },
-                { calday: "11/22/2025", sales: 828111, erc: 654 }
+                { calday: "11/22/2025", sales: 828111, erc: 654 },
+                { calday: "11/23/2025", sales: 204945, erc: 140 },
+                { calday: "11/23/2025", sales: 91939, erc: 69 },
+                { calday: "11/23/2025", sales: 63620, erc: 84 },
+                { calday: "11/23/2025", sales: 123894, erc: 68 },
+                { calday: "11/23/2025", sales: 98327, erc: 89 },
+                { calday: "11/23/2025", sales: 153799, erc: 110 },
+                { calday: "11/23/2025", sales: 104441, erc: 94 },
+                { calday: "11/23/2025", sales: 28739, erc: 29 },
+                { calday: "11/23/2025", sales: 21358, erc: 28 },
+                { calday: "11/23/2025", sales: 21292, erc: 39 },
+                { calday: "11/23/2025", sales: 63252, erc: 106 },
+                { calday: "11/23/2025", sales: -806625, erc: 671 }
             ];
 
             // NEW RAW DATASET (Updated from user input)
             const rawSrData = [
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550,000", mtdAch: "396,974", ercTgt: "426", ercAch: "337", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "43", premiumSkuAch: "40" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700,000", mtdAch: "630,687", ercTgt: "437", ercAch: "324", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "43", premiumSkuAch: "24" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550,000", mtdAch: "419,947", ercTgt: "426", ercAch: "357", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "43", premiumSkuAch: "42" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700,000", mtdAch: "640,109", ercTgt: "437", ercAch: "339", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "43", premiumSkuAch: "24" },
                 { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4,270,000", mtdAch: "321,133", ercTgt: "187", ercAch: "5", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "0", premiumSkuAch: "0" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "630,000", mtdAch: "555,789", ercTgt: "396", ercAch: "257", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "43", premiumSkuAch: "10" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580,000", mtdAch: "455,214", ercTgt: "447", ercAch: "376", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "43", premiumSkuAch: "47" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "980,000", mtdAch: "399,443", ercTgt: "313", ercAch: "302", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "33" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "640,000", mtdAch: "403,359", ercTgt: "420", ercAch: "340", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "29" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "690,000", mtdAch: "577,825", ercTgt: "445", ercAch: "370", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "54" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "600,000", mtdAch: "438,127", ercTgt: "260", ercAch: "258", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "31" },
-                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "650,000", mtdAch: "399,627", ercTgt: "318", ercAch: "291", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "39" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "630,000", mtdAch: "573,987", ercTgt: "396", ercAch: "272", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "43", premiumSkuAch: "12" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580,000", mtdAch: "468,241", ercTgt: "447", ercAch: "401", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "43", premiumSkuAch: "47" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "690,000", mtdAch: "430,806", ercTgt: "313", ercAch: "311", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "41" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "690,000", mtdAch: "417,138", ercTgt: "420", ercAch: "355", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "36" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "760,000", mtdAch: "593,896", ercTgt: "445", ercAch: "392", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "59" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "680,000", mtdAch: "456,649", ercTgt: "260", ercAch: "273", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "40" },
+                { area: "DHAKA", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "740,000", mtdAch: "418,220", ercTgt: "318", ercAch: "315", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "48" },
                 { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "510,000", mtdAch: "220,406", ercTgt: "376", ercAch: "116", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "5" },
-                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "1,050,000", mtdAch: "630,963", ercTgt: "456", ercAch: "372", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "16" },
-                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1,050,000", mtdAch: "845,410", ercTgt: "475", ercAch: "195", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "45", premiumSkuAch: "16" },
-                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "800,000", mtdAch: "261,773", ercTgt: "341", ercAch: "146", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "2" },
-                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850,000", mtdAch: "434,627", ercTgt: "352", ercAch: "225", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
-                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1,240,000", mtdAch: "759,666", ercTgt: "350", ercAch: "219", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "10" },
+                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "1,050,000", mtdAch: "669,449", ercTgt: "456", ercAch: "387", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "16" },
+                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1,050,000", mtdAch: "885,782", ercTgt: "475", ercAch: "197", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "45", premiumSkuAch: "17" },
+                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "800,000", mtdAch: "284,632", ercTgt: "341", ercAch: "148", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "2" },
+                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850,000", mtdAch: "441,760", ercTgt: "352", ercAch: "229", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
+                { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1,240,000", mtdAch: "774,710", ercTgt: "350", ercAch: "222", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "11" },
                 { area: "DHAKA", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "850,000", mtdAch: "223,855", ercTgt: "350", ercAch: "130", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "11" },
-                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "630,000", mtdAch: "494,387", ercTgt: "320", ercAch: "309", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "40" },
-                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "630,000", mtdAch: "273,719", ercTgt: "381", ercAch: "324", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "35" },
-                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "830,000", mtdAch: "577,009", ercTgt: "320", ercAch: "314", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "31" },
-                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "810,000", mtdAch: "641,285", ercTgt: "350", ercAch: "290", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "34" },
-                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "520,000", mtdAch: "117,009", ercTgt: "329", ercAch: "134", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "1" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "730,000", mtdAch: "345,737", ercTgt: "358", ercAch: "296", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "45", premiumSkuAch: "35" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "776,000", mtdAch: "307,486", ercTgt: "388", ercAch: "255", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "40", premiumSkuAch: "20" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "817,000", mtdAch: "422,112", ercTgt: "383", ercAch: "322", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "41", premiumSkuAch: "36" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "723,000", mtdAch: "499,645", ercTgt: "408", ercAch: "420", sfTbrTgt: "100", sfTbrAch: "11", premiumSkuGoal: "44", premiumSkuAch: "35" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "868,000", mtdAch: "390,314", ercTgt: "271", ercAch: "274", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "35", premiumSkuAch: "29" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "873,000", mtdAch: "545,806", ercTgt: "292", ercAch: "242", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "55", premiumSkuAch: "53" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1,085,000", mtdAch: "575,173", ercTgt: "369", ercAch: "302", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "69", premiumSkuAch: "47" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "723,000", mtdAch: "472,672", ercTgt: "408", ercAch: "385", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "60", premiumSkuAch: "3" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "922,000", mtdAch: "625,294", ercTgt: "353", ercAch: "327", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "85", premiumSkuAch: "87" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "649,000", mtdAch: "424,163", ercTgt: "429", ercAch: "414", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "12" },
-                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1,030,000", mtdAch: "551,062", ercTgt: "341", ercAch: "324", sfTbrTgt: "100", sfTbrAch: "12", premiumSkuGoal: "66", premiumSkuAch: "8" },
-                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888,000", mtdAch: "394,899", ercTgt: "394", ercAch: "251", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "11" },
-                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655,000", mtdAch: "392,444", ercTgt: "382", ercAch: "211", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "22" },
-                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645,000", mtdAch: "328,999", ercTgt: "382", ercAch: "279", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "33" },
-                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634,000", mtdAch: "295,859", ercTgt: "360", ercAch: "210", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
-                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581,000", mtdAch: "278,650", ercTgt: "381", ercAch: "157", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "13" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000166", dffName: "Delowar Hossain", sttTgt: "450,000", mtdAch: "403,584", ercTgt: "320", ercAch: "264", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000167", dffName: "Ismail Hossain", sttTgt: "450,000", mtdAch: "317,919", ercTgt: "381", ercAch: "242", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000168", dffName: "Mehedi Alam", sttTgt: "650,000", mtdAch: "178,786", ercTgt: "320", ercAch: "198", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000169", dffName: "Niloy Sarker", sttTgt: "500,000", mtdAch: "0", ercTgt: "350", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000170", dffName: "Probal Mallik", sttTgt: "450,000", mtdAch: "10,850", ercTgt: "329", ercAch: "9", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "580,000", mtdAch: "222,949", ercTgt: "360", ercAch: "310", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "50", premiumSkuAch: "16" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "420,000", mtdAch: "143,686", ercTgt: "364", ercAch: "235", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "430,000", mtdAch: "233,470", ercTgt: "313", ercAch: "250", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "30", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "640,000", mtdAch: "396,951", ercTgt: "507", ercAch: "355", sfTbrTgt: "100", sfTbrAch: "13", premiumSkuGoal: "55", premiumSkuAch: "4" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1,600,000", mtdAch: "717,695", ercTgt: "320", ercAch: "138", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "25", premiumSkuAch: "0" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "573,000", mtdAch: "351,516", ercTgt: "473", ercAch: "446", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "55", premiumSkuAch: "19" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540,000", mtdAch: "305,203", ercTgt: "329", ercAch: "270", sfTbrTgt: "100", sfTbrAch: "19", premiumSkuGoal: "30", premiumSkuAch: "15" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460,000", mtdAch: "290,114", ercTgt: "361", ercAch: "317", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "13" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "460,000", mtdAch: "318,511", ercTgt: "299", ercAch: "256", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "30", premiumSkuAch: "18" },
-                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "540,000", mtdAch: "317,635", ercTgt: "302", ercAch: "243", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "47" }
+                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "629,000", mtdAch: "536,037", ercTgt: "320", ercAch: "322", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "40" },
+                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "634,000", mtdAch: "332,076", ercTgt: "381", ercAch: "349", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "42" },
+                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "832,000", mtdAch: "617,875", ercTgt: "320", ercAch: "314", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "43" },
+                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "812,000", mtdAch: "654,210", ercTgt: "350", ercAch: "303", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "39" },
+                { area: "DHAKA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "521,000", mtdAch: "117,009", ercTgt: "329", ercAch: "134", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "1" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "730,000", mtdAch: "359,034", ercTgt: "358", ercAch: "296", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "45", premiumSkuAch: "35" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "776,000", mtdAch: "309,397", ercTgt: "388", ercAch: "256", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "40", premiumSkuAch: "19" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "817,000", mtdAch: "432,104", ercTgt: "383", ercAch: "329", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "41", premiumSkuAch: "36" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "723,000", mtdAch: "517,131", ercTgt: "408", ercAch: "442", sfTbrTgt: "100", sfTbrAch: "11", premiumSkuGoal: "44", premiumSkuAch: "38" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "868,000", mtdAch: "397,845", ercTgt: "271", ercAch: "274", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "35", premiumSkuAch: "30" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "873,000", mtdAch: "558,841", ercTgt: "292", ercAch: "243", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "55", premiumSkuAch: "53" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1,085,000", mtdAch: "602,483", ercTgt: "369", ercAch: "327", sfTbrTgt: "100", sfTbrAch: "8", premiumSkuGoal: "69", premiumSkuAch: "67" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "723,000", mtdAch: "488,800", ercTgt: "408", ercAch: "396", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "60", premiumSkuAch: "3" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "922,000", mtdAch: "645,025", ercTgt: "353", ercAch: "335", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "85", premiumSkuAch: "85" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "649,000", mtdAch: "455,849", ercTgt: "429", ercAch: "430", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "21" },
+                { area: "DHAKA", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1,030,000", mtdAch: "661,152", ercTgt: "341", ercAch: "330", sfTbrTgt: "100", sfTbrAch: "14", premiumSkuGoal: "66", premiumSkuAch: "8" },
+                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888,000", mtdAch: "412,112", ercTgt: "394", ercAch: "265", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "11" },
+                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655,000", mtdAch: "415,223", ercTgt: "382", ercAch: "211", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "24" },
+                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645,000", mtdAch: "351,492", ercTgt: "382", ercAch: "282", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "33" },
+                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634,000", mtdAch: "310,089", ercTgt: "360", ercAch: "219", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "4" },
+                { area: "DHAKA", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581,000", mtdAch: "293,875", ercTgt: "381", ercAch: "168", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "13" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000166", dffName: "Delowar Hossain", sttTgt: "565,000", mtdAch: "31,496", ercTgt: "320", ercAch: "264", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000167", dffName: "Ismail Hossain", sttTgt: "450,000", mtdAch: "31,668", ercTgt: "381", ercAch: "242", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "40", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000168", dffName: "Mehedi Alam", sttTgt: "466,000", mtdAch: "9,013", ercTgt: "320", ercAch: "198", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000169", dffName: "Niloy Sarker", sttTgt: "460,000", mtdAch: "21,487", ercTgt: "350", ercAch: "17", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000170", dffName: "Probal Mallik", sttTgt: "560,000", mtdAch: "10,850", ercTgt: "329", ercAch: "9", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "580,000", mtdAch: "235,135", ercTgt: "360", ercAch: "318", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "50", premiumSkuAch: "16" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "420,000", mtdAch: "148,358", ercTgt: "364", ercAch: "244", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "430,000", mtdAch: "245,351", ercTgt: "313", ercAch: "252", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "30", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "640,000", mtdAch: "415,349", ercTgt: "507", ercAch: "380", sfTbrTgt: "100", sfTbrAch: "15", premiumSkuGoal: "55", premiumSkuAch: "4" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1,600,000", mtdAch: "783,208", ercTgt: "320", ercAch: "173", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "25", premiumSkuAch: "0" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "580,000", mtdAch: "372,046", ercTgt: "473", ercAch: "477", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "55", premiumSkuAch: "19" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540,000", mtdAch: "312,916", ercTgt: "329", ercAch: "282", sfTbrTgt: "100", sfTbrAch: "19", premiumSkuGoal: "30", premiumSkuAch: "15" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460,000", mtdAch: "303,760", ercTgt: "361", ercAch: "333", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "13" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "460,000", mtdAch: "335,316", ercTgt: "299", ercAch: "276", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "30", premiumSkuAch: "21" },
+                { area: "CTG", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "540,000", mtdAch: "322,122", ercTgt: "302", ercAch: "251", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "47" }
             ];
 
             const fullSrData = rawSrData.map(sr => {
@@ -758,39 +770,6 @@
 
                 return newSr;
             });
-
-            // --- UPDATE: Adjust STT Targets to match specific Territory Goals ---
-            const territoryTargetGoals = {
-                "DHAKA EAST": 9198000,
-                "DHAKA NORTH MIRPUR": 6350400,
-                "DHAKA NORTH UTTARA": 3429720,
-                "DHAKA SOUTH": 3402000,
-                "DHAKA WEST": 10290420,
-                "CTG NORTH & SOUTH": 8750000
-            };
-
-            // 1. Calculate current sums from raw SR data
-            const currentTerritorySums = {};
-            fullSrData.forEach(sr => {
-                if (!currentTerritorySums[sr.territory]) currentTerritorySums[sr.territory] = 0;
-                currentTerritorySums[sr.territory] += sr.sttTgt;
-            });
-
-            // 2. Distribute difference to the first SR of each territory to ensure totals match exactly
-            Object.keys(territoryTargetGoals).forEach(terr => {
-                const goal = territoryTargetGoals[terr];
-                const current = currentTerritorySums[terr] || 0;
-                const diff = goal - current;
-                
-                if (diff !== 0) {
-                    // Find the first SR in this territory to apply the adjustment
-                    const sr = fullSrData.find(s => s.territory === terr);
-                    if (sr) {
-                        sr.sttTgt += diff;
-                    }
-                }
-            });
-            // --------------------------------------------------------------------
 
             let processedTerritoryData = [];
             let processedDbData = [];
@@ -1269,7 +1248,7 @@
                     timeElapsed: {
                         label: "Time Elapsed", 
                         percentage: timeElapsedPercent,
-                        valueText: "19 out of 26 Working Days Passed", 
+                        valueText: "20 out of 26 Working Days Passed", 
                         rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' },
                         isBenchmark: true
                     },
