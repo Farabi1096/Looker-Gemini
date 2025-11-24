@@ -237,7 +237,7 @@
                     <!-- Trend Filter Buttons -->
                     <div class="flex flex-wrap gap-2" id="trend-buttons">
                         <button class="trend-btn active" data-filter="MTD">MTD</button>
-                        <button class="trend-btn" data-filter="L3M">L3M</button>
+                        <button class="trend-btn" data-filter="L3D">L3D</button>
                         <button class="trend-btn" data-filter="W1">W1</button>
                         <button class="trend-btn" data-filter="W2">W2</button>
                         <button class="trend-btn" data-filter="W3">W3</button>
@@ -861,7 +861,7 @@
             }
             
             function filterTrendData(data, filterType) {
-                if (filterType === 'L3M') {
+                if (filterType === 'L3D') {
                     return data.slice(-3);
                 }
                 if (filterType === 'W1') {
