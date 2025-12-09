@@ -136,7 +136,7 @@
             <div class="mb-4 xl:mb-0">
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white">SPARTA MTD Sales Performance</h1>
                 <!-- UPDATED DATE -->
-                <p class="text-lg text-gray-200 mt-1">(Data as of Nov 30th, 2025)</p>
+                <p class="text-lg text-gray-200 mt-1">(Data as of Dec 8th, 2025)</p>
             </div>
             
             <!-- Filter Dropdowns Section (Compact layout) -->
@@ -211,7 +211,7 @@
                 <!-- Territory STT Achievement Chart (Visible by default) -->
                 <div id="territory-chart-container" style="display: block;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Territory STT Achievement vs. Target</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">100.0%</span> (Ranked by Achievement)</p>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span> (Ranked by Achievement)</p>
                     <div id="stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
                     </div>
@@ -220,7 +220,7 @@
                 <!-- DB STT Achievement Chart (Hidden by default) -->
                 <div id="db-chart-container" style="display: none;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target (Aggregated)</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">100.0%</span> (Ranked by Achievement)</p>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span> (Ranked by Achievement)</p>
                     <div id="db-stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
                     </div>
@@ -256,7 +256,7 @@
             <!-- Top 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">100.0%</span></p>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span></p>
                 <div id="top-10-sr-chart" class="space-y-4">
                     <!-- Top 10 SRs populated by JS -->
                 </div>
@@ -265,7 +265,7 @@
             <!-- Bottom 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">100.0%</span></p>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span></p>
                 <div id="bottom-10-sr-chart" class="space-y-4">
                     <!-- Bottom 10 SRs populated by JS -->
                 </div>
@@ -384,7 +384,7 @@
         // Register the DataLabels plugin
         Chart.register(ChartDataLabels);
 
-        const timeElapsedPercent = 100.0; // Benchmark updated to (26/26 days)
+        const timeElapsedPercent = 26.92; // Benchmark updated to (7/26 days)
         const LAC_DIVISOR = 100000;
         
         // Object to track current selections
@@ -406,6 +406,11 @@
                 return value;
             }
             if (typeof value === 'string') {
+                // Check if it has 'k' (e.g., 50k)
+                if (value.toLowerCase().includes('k')) {
+                    const number = parseFloat(value.toLowerCase().replace('k', '').replace(/,/g, ''));
+                    return isNaN(number) ? 0 : number * 1000; 
+                }
                 // Remove commas, percentage signs, and then convert to float
                 const cleanedValue = value.replace(/,/g, '').replace(/%/g, '');
                 const number = parseFloat(cleanedValue);
@@ -480,351 +485,144 @@
             let comboChartInstance = null;
             let globalSttAch = 0;
             
-            // --- CHART DATA (NEW DATA from User Input) ---
+            // --- CHART DATA (NEW DATA from User Input - Dec 1st to Dec 8th ONLY) ---
             const dailyRawData = [
-                { calday: "11/1/2025", sales: 132114, erc: 97 },
-                { calday: "11/1/2025", sales: 111705, erc: 95 },
-                { calday: "11/1/2025", sales: 65085, erc: 76 },
-                { calday: "11/1/2025", sales: 144001, erc: 75 },
-                { calday: "11/1/2025", sales: 111531, erc: 96 },
-                { calday: "11/1/2025", sales: 90511, erc: 78 },
-                { calday: "11/1/2025", sales: 24876, erc: 35 },
-                { calday: "11/1/2025", sales: 31507, erc: 49 },
-                { calday: "11/1/2025", sales: 4761, erc: 10 },
-                { calday: "11/1/2025", sales: 24163, erc: 25 },
-                { calday: "11/1/2025", sales: 105561, erc: 100 },
-                { calday: "11/2/2025", sales: 133991, erc: 76 },
-                { calday: "11/2/2025", sales: 63887, erc: 75 },
-                { calday: "11/2/2025", sales: 82901, erc: 86 },
-                { calday: "11/2/2025", sales: 168944, erc: 102 },
-                { calday: "11/2/2025", sales: 105672, erc: 95 },
-                { calday: "11/2/2025", sales: 88311, erc: 93 },
-                { calday: "11/2/2025", sales: 47947, erc: 54 },
-                { calday: "11/2/2025", sales: 27196, erc: 36 },
-                { calday: "11/2/2025", sales: 38872, erc: 68 },
-                { calday: "11/2/2025", sales: 19022, erc: 32 },
-                { calday: "11/2/2025", sales: 112934, erc: 96 },
-                { calday: "11/3/2025", sales: 209434, erc: 125 },
-                { calday: "11/3/2025", sales: 65015, erc: 74 },
-                { calday: "11/3/2025", sales: 109248, erc: 124 },
-                { calday: "11/3/2025", sales: 210592, erc: 103 },
-                { calday: "11/3/2025", sales: 185713, erc: 133 },
-                { calday: "11/3/2025", sales: 117540, erc: 118 },
-                { calday: "11/3/2025", sales: 58802, erc: 77 },
-                { calday: "11/3/2025", sales: 30469, erc: 59 },
-                { calday: "11/3/2025", sales: 58208, erc: 93 },
-                { calday: "11/3/2025", sales: 40018, erc: 53 },
-                { calday: "11/3/2025", sales: 133703, erc: 136 },
-                { calday: "11/4/2025", sales: 125357, erc: 101 },
-                { calday: "11/4/2025", sales: 75146, erc: 84 },
-                { calday: "11/4/2025", sales: 68927, erc: 97 },
-                { calday: "11/4/2025", sales: 100283, erc: 126 },
-                { calday: "11/4/2025", sales: 101937, erc: 111 },
-                { calday: "11/4/2025", sales: 105745, erc: 129 },
-                { calday: "11/4/2025", sales: 62987, erc: 70 },
-                { calday: "11/4/2025", sales: 33650, erc: 58 },
-                { calday: "11/4/2025", sales: 31265, erc: 48 },
-                { calday: "11/4/2025", sales: 168910, erc: 160 },
-                { calday: "11/5/2025", sales: 138305, erc: 105 },
-                { calday: "11/5/2025", sales: 73654, erc: 80 },
-                { calday: "11/5/2025", sales: 87476, erc: 59 },
-                { calday: "11/5/2025", sales: 221169, erc: 112 },
-                { calday: "11/5/2025", sales: 141646, erc: 112 },
-                { calday: "11/5/2025", sales: 137031, erc: 121 },
-                { calday: "11/5/2025", sales: 78350, erc: 65 },
-                { calday: "11/5/2025", sales: 57025, erc: 111 },
-                { calday: "11/5/2025", sales: 37164, erc: 57 },
-                { calday: "11/5/2025", sales: 25699, erc: 36 },
-                { calday: "11/5/2025", sales: 134100, erc: 184 },
-                { calday: "11/6/2025", sales: 125278, erc: 119 },
-                { calday: "11/6/2025", sales: 85071, erc: 108 },
-                { calday: "11/6/2025", sales: 53742, erc: 77 },
-                { calday: "11/6/2025", sales: 134128, erc: 71 },
-                { calday: "11/6/2025", sales: 110420, erc: 109 },
-                { calday: "11/6/2025", sales: 331019, erc: 90 },
-                { calday: "11/6/2025", sales: 76939, erc: 73 },
-                { calday: "11/6/2025", sales: 23929, erc: 29 },
-                { calday: "11/6/2025", sales: 45062, erc: 76 },
-                { calday: "11/6/2025", sales: 37053, erc: 27 },
-                { calday: "11/6/2025", sales: 109273, erc: 221 },
-                { calday: "11/7/2025", sales: -135416, erc: 114 },
-                { calday: "11/7/2025", sales: 97542, erc: 162 },
-                { calday: "11/10/2025", sales: 578132, erc: 320 },
-                { calday: "11/10/2025", sales: 545434, erc: 50 },
-                { calday: "11/10/2025", sales: 132756, erc: 78 },
-                { calday: "11/10/2025", sales: 306316, erc: 118 },
-                { calday: "11/10/2025", sales: 60513, erc: 61 },
-                { calday: "11/10/2025", sales: 494475, erc: 173 },
-                { calday: "11/10/2025", sales: 103588, erc: 150 },
-                { calday: "11/10/2025", sales: 293340, erc: 269 },
-                { calday: "11/11/2025", sales: 249505, erc: 179 },
-                { calday: "11/11/2025", sales: 450206, erc: 146 },
-                { calday: "11/11/2025", sales: 54290, erc: 75 },
-                { calday: "11/11/2025", sales: 135889, erc: 88 },
-                { calday: "11/11/2025", sales: 61509, erc: 90 },
-                { calday: "11/11/2025", sales: 272737, erc: 302 },
-                { calday: "11/11/2025", sales: 31668, erc: 43 },
-                { calday: "11/11/2025", sales: 48535, erc: 55 },
-                { calday: "11/11/2025", sales: 50115, erc: 93 },
-                { calday: "11/11/2025", sales: 193440, erc: 184 },
-                { calday: "11/11/2025", sales: 379489, erc: 309 },
-                { calday: "11/12/2025", sales: 105109, erc: 175 },
-                { calday: "11/12/2025", sales: 103667, erc: 99 },
-                { calday: "11/12/2025", sales: 135502, erc: 126 },
-                { calday: "11/12/2025", sales: 147030, erc: 98 },
-                { calday: "11/12/2025", sales: 137435, erc: 99 },
-                { calday: "11/12/2025", sales: 114506, erc: 113 },
-                { calday: "11/12/2025", sales: 59509, erc: 62 },
-                { calday: "11/12/2025", sales: 9987, erc: 17 },
-                { calday: "11/12/2025", sales: 34265, erc: 45 },
-                { calday: "11/12/2025", sales: 29549, erc: 33 },
-                { calday: "11/12/2025", sales: 63880, erc: 188 },
-                { calday: "11/13/2025", sales: 122096, erc: 168 },
-                { calday: "11/13/2025", sales: 76040, erc: 84 },
-                { calday: "11/13/2025", sales: 45030, erc: 56 },
-                { calday: "11/13/2025", sales: 236186, erc: 119 },
-                { calday: "11/13/2025", sales: 93668, erc: 102 },
-                { calday: "11/13/2025", sales: 159791, erc: 107 },
-                { calday: "11/13/2025", sales: 47584, erc: 46 },
-                { calday: "11/13/2025", sales: 15398, erc: 14 },
-                { calday: "11/13/2025", sales: 36982, erc: 50 },
-                { calday: "11/13/2025", sales: 21283, erc: 19 },
-                { calday: "11/13/2025", sales: 76001, erc: 138 },
-                { calday: "11/14/2025", sales: 13699, erc: 19 },
-                { calday: "11/14/2025", sales: -3336, erc: 11 },
-                { calday: "11/15/2025", sales: 109591, erc: 87 },
-                { calday: "11/15/2025", sales: 80453, erc: 84 },
-                { calday: "11/15/2025", sales: 84210, erc: 87 },
-                { calday: "11/15/2025", sales: 216815, erc: 135 },
-                { calday: "11/15/2025", sales: 182743, erc: 116 },
-                { calday: "11/15/2025", sales: 79946, erc: 110 },
-                { calday: "11/15/2025", sales: 42115, erc: 25 },
-                { calday: "11/15/2025", sales: 84075, erc: 139 },
-                { calday: "11/15/2025", sales: 26133, erc: 44 },
-                { calday: "11/15/2025", sales: 48420, erc: 60 },
-                { calday: "11/15/2025", sales: 90729, erc: 90 },
-                { calday: "11/16/2025", sales: 162528, erc: 109 },
-                { calday: "11/16/2025", sales: 95359, erc: 101 },
-                { calday: "11/16/2025", sales: 52592, erc: 118 },
-                { calday: "11/16/2025", sales: 113770, erc: 75 },
-                { calday: "11/16/2025", sales: 80155, erc: 98 },
-                { calday: "11/16/2025", sales: 118409, erc: 117 },
-                { calday: "11/16/2025", sales: 80727, erc: 114 },
-                { calday: "11/16/2025", sales: 40234, erc: 47 },
-                { calday: "11/16/2025", sales: 14142, erc: 20 },
-                { calday: "11/16/2025", sales: 27496, erc: 41 },
-                { calday: "11/16/2025", sales: 81679, erc: 90 },
-                { calday: "11/16/2025", sales: 0, erc: 2 },
-                { calday: "11/16/2025", sales: 0, erc: 2 },
-                { calday: "11/17/2025", sales: 156557, erc: 128 },
-                { calday: "11/17/2025", sales: 77130, erc: 85 },
-                { calday: "11/17/2025", sales: 278416, erc: 100 },
-                { calday: "11/17/2025", sales: 185584, erc: 99 },
-                { calday: "11/17/2025", sales: 88619, erc: 76 },
-                { calday: "11/17/2025", sales: 90810, erc: 114 },
-                { calday: "11/17/2025", sales: 43195, erc: 22 },
-                { calday: "11/17/2025", sales: 55401, erc: 77 },
-                { calday: "11/17/2025", sales: 31730, erc: 39 },
-                { calday: "11/17/2025", sales: 34324, erc: 45 },
-                { calday: "11/17/2025", sales: 167048, erc: 158 },
-                { calday: "11/18/2025", sales: 97863, erc: 135 },
-                { calday: "11/18/2025", sales: 87328, erc: 118 },
-                { calday: "11/18/2025", sales: 45177, erc: 60 },
-                { calday: "11/18/2025", sales: 228917, erc: 139 },
-                { calday: "11/18/2025", sales: 110496, erc: 92 },
-                { calday: "11/18/2025", sales: 75250, erc: 83 },
-                { calday: "11/18/2025", sales: 36575, erc: 16 },
-                { calday: "11/18/2025", sales: 68464, erc: 98 },
-                { calday: "11/18/2025", sales: 24066, erc: 19 },
-                { calday: "11/18/2025", sales: 18043, erc: 24 },
-                { calday: "11/18/2025", sales: 179085, erc: 127 },
-                { calday: "11/19/2025", sales: 104332, erc: 101 },
-                { calday: "11/19/2025", sales: 74019, erc: 81 },
-                { calday: "11/19/2025", sales: 50476, erc: 71 },
-                { calday: "11/19/2025", sales: 729437, erc: 99 },
-                { calday: "11/19/2025", sales: 93258, erc: 89 },
-                { calday: "11/19/2025", sales: 100875, erc: 95 },
-                { calday: "11/19/2025", sales: 113792, erc: 119 },
-                { calday: "11/19/2025", sales: 34879, erc: 53 },
-                { calday: "11/19/2025", sales: 24455, erc: 30 },
-                { calday: "11/19/2025", sales: 9310, erc: 14 },
-                { calday: "11/19/2025", sales: 211898, erc: 179 },
-                { calday: "11/19/2025", sales: 16774, erc: 14 },
-                { calday: "11/19/2025", sales: 16774, erc: 14 },
-                { calday: "11/20/2025", sales: 125845, erc: 154 },
-                { calday: "11/20/2025", sales: 83913, erc: 104 },
-                { calday: "11/20/2025", sales: -496779, erc: 86 },
-                { calday: "11/20/2025", sales: 132661, erc: 87 },
-                { calday: "11/20/2025", sales: 48561, erc: 55 },
-                { calday: "11/20/2025", sales: 97987, erc: 72 },
-                { calday: "11/20/2025", sales: 36850, erc: 51 },
-                { calday: "11/20/2025", sales: 23062, erc: 14 },
-                { calday: "11/20/2025", sales: 47779, erc: 42 },
-                { calday: "11/20/2025", sales: 98585, erc: 125 },
-                { calday: "11/20/2025", sales: 66252, erc: 59 },
-                { calday: "11/20/2025", sales: 66252, erc: 59 },
-                { calday: "11/21/2025", sales: -8566, erc: 10 },
-                { calday: "11/21/2025", sales: 71543, erc: 31 },
-                { calday: "11/22/2025", sales: 102610, erc: 181 },
-                { calday: "11/22/2025", sales: 172172, erc: 152 },
-                { calday: "11/22/2025", sales: 517380, erc: 86 },
-                { calday: "11/22/2025", sales: 598889, erc: 556 },
-                { calday: "11/22/2025", sales: 174602, erc: 87 },
-                { calday: "11/22/2025", sales: 111854, erc: 66 },
-                { calday: "11/22/2025", sales: 68634, erc: 52 },
-                { calday: "11/22/2025", sales: 36157, erc: 43 },
-                { calday: "11/22/2025", sales: 12398, erc: 11 },
-                { calday: "11/22/2025", sales: 29283, erc: 31 },
-                { calday: "11/22/2025", sales: 104886, erc: 165 },
-                { calday: "11/22/2025", sales: 828111, erc: 654 },
-                { calday: "11/22/2025", sales: 828111, erc: 654 },
-                { calday: "11/23/2025", sales: 204945, erc: 140 },
-                { calday: "11/23/2025", sales: 91939, erc: 69 },
-                { calday: "11/23/2025", sales: 63620, erc: 84 },
-                { calday: "11/23/2025", sales: 123894, erc: 68 },
-                { calday: "11/23/2025", sales: 98327, erc: 89 },
-                { calday: "11/23/2025", sales: 153799, erc: 110 },
-                { calday: "11/23/2025", sales: 104441, erc: 94 },
-                { calday: "11/23/2025", sales: 28739, erc: 29 },
-                { calday: "11/23/2025", sales: 21358, erc: 28 },
-                { calday: "11/23/2025", sales: 21292, erc: 39 },
-                { calday: "11/23/2025", sales: 63252, erc: 106 },
-                { calday: "11/23/2025", sales: -806625, erc: 671 },
-                { calday: "11/23/2025", sales: -806625, erc: 671 },
-                { calday: "11/24/2025", sales: 70665, erc: 193 },
-                { calday: "11/24/2025", sales: 96655, erc: 76 },
-                { calday: "11/24/2025", sales: 94150, erc: 71 },
-                { calday: "11/24/2025", sales: 171292, erc: 136 },
-                { calday: "11/24/2025", sales: 227760, erc: 111 },
-                { calday: "11/24/2025", sales: 113792, erc: 91 },
-                { calday: "11/24/2025", sales: 68031, erc: 71 },
-                { calday: "11/24/2025", sales: 37825, erc: 36 },
-                { calday: "11/24/2025", sales: 16460, erc: 10 },
-                { calday: "11/24/2025", sales: 50406, erc: 53 },
-                { calday: "11/24/2025", sales: 70927, erc: 144 },
-                { calday: "11/24/2025", sales: 78136, erc: 96 },
-                { calday: "11/24/2025", sales: 78136, erc: 96 },
-                { calday: "11/25/2025", sales: 53291, erc: 121 },
-                { calday: "11/25/2025", sales: 103557, erc: 105 },
-                { calday: "11/25/2025", sales: 1098358, erc: 120 },
-                { calday: "11/25/2025", sales: 679852, erc: 161 },
-                { calday: "11/25/2025", sales: 156115, erc: 113 },
-                { calday: "11/25/2025", sales: 113087, erc: 82 },
-                { calday: "11/25/2025", sales: 111911, erc: 77 },
-                { calday: "11/25/2025", sales: 40224, erc: 49 },
-                { calday: "11/25/2025", sales: 14841, erc: 21 },
-                { calday: "11/25/2025", sales: 44593, erc: 50 },
-                { calday: "11/25/2025", sales: 112023, erc: 147 },
-                { calday: "11/25/2025", sales: 230129, erc: 250 },
-                { calday: "11/25/2025", sales: 230129, erc: 250 },
-                { calday: "11/26/2025", sales: 172219, erc: 158 },
-                { calday: "11/26/2025", sales: 94615, erc: 133 },
-                { calday: "11/26/2025", sales: 57872, erc: 84 },
-                { calday: "11/26/2025", sales: 118520, erc: 104 },
-                { calday: "11/26/2025", sales: 124168, erc: 90 },
-                { calday: "11/26/2025", sales: 83557, erc: 68 },
-                { calday: "11/26/2025", sales: 141522, erc: 63 },
-                { calday: "11/26/2025", sales: 28508, erc: 33 },
-                { calday: "11/26/2025", sales: 113619, erc: 26 },
-                { calday: "11/26/2025", sales: 11283, erc: 10 },
-                { calday: "11/26/2025", sales: 72365, erc: 106 },
-                { calday: "11/26/2025", sales: 31810, erc: 29 },
-                { calday: "11/26/2025", sales: 31810, erc: 29 },
-                { calday: "11/27/2025", sales: 78231, erc: 126 },
-                { calday: "11/27/2025", sales: 56263, erc: 65 },
-                { calday: "11/27/2025", sales: 73289, erc: 92 },
-                { calday: "11/27/2025", sales: 65934, erc: 61 },
-                { calday: "11/27/2025", sales: 50081, erc: 31 },
-                { calday: "11/27/2025", sales: 68354, erc: 49 },
-                { calday: "11/27/2025", sales: 12420, erc: 13 },
-                { calday: "11/27/2025", sales: 23283, erc: 21 },
-                { calday: "11/27/2025", sales: 187538, erc: 160 },
-                { calday: "11/27/2025", sales: 341306, erc: 318 },
-                { calday: "11/27/2025", sales: 341306, erc: 318 },
-                { calday: "11/28/2025", sales: 31195, erc: 5 },
-                { calday: "11/29/2025", sales: 131939, erc: 90 },
-                { calday: "11/29/2025", sales: 182146, erc: 264 },
-                { calday: "11/29/2025", sales: 104444, erc: 70 },
-                { calday: "11/29/2025", sales: 310354, erc: 222 },
-                { calday: "11/29/2025", sales: 319450, erc: 148 },
-                { calday: "11/29/2025", sales: 26303, erc: 60 },
-                { calday: "11/29/2025", sales: 371958, erc: 128 },
-                { calday: "11/29/2025", sales: 38166, erc: 57 },
-                { calday: "11/29/2025", sales: 20350, erc: 25 },
-                { calday: "11/29/2025", sales: 78593, erc: 67 },
-                { calday: "11/29/2025", sales: 36163, erc: 153 },
-                { calday: "11/29/2025", sales: 61753, erc: 38 },
-                { calday: "11/29/2025", sales: 61753, erc: 38 },
-                { calday: "11/30/2025", sales: 344123, erc: 128 },
-                { calday: "11/30/2025", sales: 69690, erc: 96 },
-                { calday: "11/30/2025", sales: 711699, erc: 77 },
-                { calday: "11/30/2025", sales: 1657805, erc: 1115 },
-                { calday: "11/30/2025", sales: 447978, erc: 97 },
-                { calday: "11/30/2025", sales: 298624, erc: 114 },
-                { calday: "11/30/2025", sales: 670037, erc: 92 },
-                { calday: "11/30/2025", sales: 15606, erc: 26 },
-                { calday: "11/30/2025", sales: 217009, erc: 19 },
-                { calday: "11/30/2025", sales: 202354, erc: 19 },
-                { calday: "11/30/2025", sales: 279483, erc: 116 },
-                { calday: "11/30/2025", sales: 929593, erc: 49 },
-                { calday: "11/30/2025", sales: 929593, erc: 49 }
+                { calday: "12/1/2025", sales: 122502, erc: 101, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/1/2025", sales: 82858, erc: 106, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
+                { calday: "12/1/2025", sales: 80351, erc: 123, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
+                { calday: "12/1/2025", sales: 77863, erc: 51, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/1/2025", sales: 149878, erc: 113, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/1/2025", sales: 125215, erc: 120, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/1/2025", sales: 114841, erc: 133, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
+                { calday: "12/1/2025", sales: 34717, erc: 48, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/1/2025", sales: 41380, erc: 45, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
+                { calday: "12/1/2025", sales: 23212, erc: 30, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
+                { calday: "12/1/2025", sales: 103207, erc: 92, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/1/2025", sales: 59216, erc: 35, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
+                { calday: "12/2/2025", sales: 144277, erc: 123, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/2/2025", sales: 88083, erc: 110, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
+                { calday: "12/2/2025", sales: 55655, erc: 95, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
+                { calday: "12/2/2025", sales: 79738, erc: 69, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/2/2025", sales: 79593, erc: 91, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/2/2025", sales: 103129, erc: 164, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/2/2025", sales: 78606, erc: 65, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
+                { calday: "12/2/2025", sales: -205237, erc: 376, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/2/2025", sales: 31354, erc: 38, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
+                { calday: "12/2/2025", sales: 22779, erc: 32, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
+                { calday: "12/2/2025", sales: 8412, erc: 218, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/2/2025", sales: 93412, erc: 50, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
+                { calday: "12/3/2025", sales: 108226, erc: 65, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/3/2025", sales: 67332, erc: 96, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
+                { calday: "12/3/2025", sales: 52717, erc: 76, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
+                { calday: "12/3/2025", sales: 62466, erc: 49, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/3/2025", sales: 126127, erc: 90, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/3/2025", sales: 34911, erc: 141, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/3/2025", sales: 86380, erc: 59, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
+                { calday: "12/3/2025", sales: 41478, erc: 71, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/3/2025", sales: 23792, erc: 34, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
+                { calday: "12/3/2025", sales: 32974, erc: 41, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
+                { calday: "12/3/2025", sales: 162081, erc: 153, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/3/2025", sales: 42144, erc: 37, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
+                { calday: "12/4/2025", sales: 127935, erc: 123, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/4/2025", sales: 81399, erc: 91, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
+                { calday: "12/4/2025", sales: 82141, erc: 82, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
+                { calday: "12/4/2025", sales: 145250, erc: 99, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/4/2025", sales: 102863, erc: 119, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/4/2025", sales: 137356, erc: 101, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/4/2025", sales: 85743, erc: 70, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
+                { calday: "12/4/2025", sales: 56327, erc: 69, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/4/2025", sales: 143185, erc: 95, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/4/2025", sales: 99696, erc: 44, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
+                { calday: "12/6/2025", sales: 129842, erc: 112, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/6/2025", sales: 75971, erc: 41, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/6/2025", sales: 102445, erc: 94, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/6/2025", sales: 135342, erc: 125, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/6/2025", sales: 68337, erc: 81, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/6/2025", sales: 65911, erc: 81, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
+                { calday: "12/6/2025", sales: 23186, erc: 21, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
+                { calday: "12/6/2025", sales: 113591, erc: 107, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/6/2025", sales: 36637, erc: 10, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
+                { calday: "12/7/2025", sales: 180895, erc: 144, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/7/2025", sales: 80932, erc: 104, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
+                { calday: "12/7/2025", sales: 102101, erc: 61, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/7/2025", sales: 112438, erc: 139, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/7/2025", sales: 78044, erc: 125, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/7/2025", sales: 97796, erc: 63, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
+                { calday: "12/7/2025", sales: 67988, erc: 78, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/7/2025", sales: 27990, erc: 26, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
+                { calday: "12/7/2025", sales: 40646, erc: 38, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
+                { calday: "12/7/2025", sales: 155018, erc: 120, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/7/2025", sales: 82034, erc: 55, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
+                { calday: "12/8/2025", sales: 137821, erc: 137, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
+                { calday: "12/8/2025", sales: 233984, erc: 99, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
+                { calday: "12/8/2025", sales: 105327, erc: 74, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
+                { calday: "12/8/2025", sales: 176473, erc: 122, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
+                { calday: "12/8/2025", sales: 124493, erc: 106, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
+                { calday: "12/8/2025", sales: 178703, erc: 155, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
+                { calday: "12/8/2025", sales: 97320, erc: 70, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
+                { calday: "12/8/2025", sales: -251, erc: 75, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
+                { calday: "12/8/2025", sales: 38018, erc: 41, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
+                { calday: "12/8/2025", sales: 54398, erc: 55, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
+                { calday: "12/8/2025", sales: 66221, erc: 218, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
+                { calday: "12/8/2025", sales: 74984, erc: 52, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" }
             ];
 
             // NEW RAW DATASET (Updated from user input)
             const rawSrData = [
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550000", mtdAch: "598009", ercTgt: "426", ercAch: "428", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "43", premiumSkuAch: "45" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700000", mtdAch: "760030", ercTgt: "437", ercAch: "453", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "43", premiumSkuAch: "45" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4270000", mtdAch: "1847788", ercTgt: "187", ercAch: "16", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "0", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "630000", mtdAch: "744182", ercTgt: "396", ercAch: "400", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "43", premiumSkuAch: "44" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580000", mtdAch: "613221", ercTgt: "447", ercAch: "494", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "43", premiumSkuAch: "50" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "690000", mtdAch: "694882", ercTgt: "313", ercAch: "338", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "44", premiumSkuAch: "47" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "680000", mtdAch: "693997", ercTgt: "420", ercAch: "425", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "48" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "740000", mtdAch: "769985", ercTgt: "445", ercAch: "464", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "61" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "680000", mtdAch: "687598", ercTgt: "260", ercAch: "285", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "44", premiumSkuAch: "53" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "730000", mtdAch: "745717", ercTgt: "318", ercAch: "334", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "49" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "490000", mtdAch: "565911", ercTgt: "376", ercAch: "386", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "6" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "1000000", mtdAch: "1066679", ercTgt: "456", ercAch: "476", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "44", premiumSkuAch: "18" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1050000", mtdAch: "1092867", ercTgt: "475", ercAch: "243", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "45", premiumSkuAch: "17" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "800000", mtdAch: "831281", ercTgt: "340", ercAch: "349", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "3" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850000", mtdAch: "851290", ercTgt: "352", ercAch: "361", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "6" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1200000", mtdAch: "1248253", ercTgt: "350", ercAch: "352", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "18" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "850000", mtdAch: "879261", ercTgt: "350", ercAch: "358", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "629000", mtdAch: "661268", ercTgt: "322", ercAch: "336", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "57" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "634000", mtdAch: "435416", ercTgt: "389", ercAch: "391", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "44", premiumSkuAch: "50" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "820000", mtdAch: "832924", ercTgt: "317", ercAch: "329", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "44", premiumSkuAch: "51" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "812000", mtdAch: "896033", ercTgt: "330", ercAch: "334", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "44", premiumSkuAch: "50" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "521000", mtdAch: "117009", ercTgt: "342", ercAch: "134", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "44", premiumSkuAch: "1" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "730000", mtdAch: "471012", ercTgt: "360", ercAch: "375", sfTbrTgt: "100", sfTbrAch: "10", premiumSkuGoal: "45", premiumSkuAch: "43" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "776000", mtdAch: "405862", ercTgt: "390", ercAch: "391", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "40", premiumSkuAch: "44" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "817000", mtdAch: "538009", ercTgt: "382", ercAch: "393", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "41", premiumSkuAch: "42" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "725000", mtdAch: "654545", ercTgt: "410", ercAch: "458", sfTbrTgt: "100", sfTbrAch: "14", premiumSkuGoal: "44", premiumSkuAch: "50" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "868000", mtdAch: "473892", ercTgt: "271", ercAch: "290", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "35", premiumSkuAch: "36" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "873000", mtdAch: "789532", ercTgt: "292", ercAch: "294", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "55", premiumSkuAch: "57" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1085000", mtdAch: "754506", ercTgt: "369", ercAch: "380", sfTbrTgt: "100", sfTbrAch: "8", premiumSkuGoal: "69", premiumSkuAch: "70" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "723000", mtdAch: "544427", ercTgt: "408", ercAch: "431", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "60", premiumSkuAch: "8" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "922000", mtdAch: "972749", ercTgt: "353", ercAch: "364", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "85", premiumSkuAch: "93" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "650000", mtdAch: "657484", ercTgt: "429", ercAch: "467", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "50", premiumSkuAch: "58" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1030000", mtdAch: "774610", ercTgt: "341", ercAch: "350", sfTbrTgt: "100", sfTbrAch: "16", premiumSkuGoal: "66", premiumSkuAch: "8" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888000", mtdAch: "557722", ercTgt: "395", ercAch: "400", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "13" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655000", mtdAch: "547028", ercTgt: "380", ercAch: "383", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "28" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645000", mtdAch: "493910", ercTgt: "380", ercAch: "383", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "46" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634000", mtdAch: "420669", ercTgt: "360", ercAch: "361", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "44", premiumSkuAch: "5" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581000", mtdAch: "366389", ercTgt: "380", ercAch: "247", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "44", premiumSkuAch: "13" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000166", dffName: "Delowar Hossain", sttTgt: "564000", mtdAch: "601473", ercTgt: "368", ercAch: "264", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000167", dffName: "Ismail Hossain", sttTgt: "450000", mtdAch: "483091", ercTgt: "268", ercAch: "292", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "40", premiumSkuAch: "13" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000168", dffName: "Mehedi Alam", sttTgt: "466000", mtdAch: "93265", ercTgt: "447", ercAch: "275", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "1" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000169", dffName: "Niloy Sarker", sttTgt: "460000", mtdAch: "489446", ercTgt: "304", ercAch: "304", sfTbrTgt: "100", sfTbrAch: "20", premiumSkuGoal: "40", premiumSkuAch: "4" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000170", dffName: "Probal Mallik", sttTgt: "560000", mtdAch: "109965", ercTgt: "313", ercAch: "11", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "40", premiumSkuAch: "0" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "580000", mtdAch: "317266", ercTgt: "360", ercAch: "375", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "50", premiumSkuAch: "41" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "420000", mtdAch: "181425", ercTgt: "364", ercAch: "276", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "30", premiumSkuAch: "0" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "430000", mtdAch: "302904", ercTgt: "313", ercAch: "290", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "30", premiumSkuAch: "0" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "640000", mtdAch: "673238", ercTgt: "507", ercAch: "547", sfTbrTgt: "100", sfTbrAch: "17", premiumSkuGoal: "55", premiumSkuAch: "58" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1600000", mtdAch: "1719128", ercTgt: "320", ercAch: "330", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "25", premiumSkuAch: "0" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "580000", mtdAch: "610050", ercTgt: "473", ercAch: "506", sfTbrTgt: "100", sfTbrAch: "28", premiumSkuGoal: "55", premiumSkuAch: "60" },
-                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540000", mtdAch: "557752", ercTgt: "329", ercAch: "338", sfTbrTgt: "100", sfTbrAch: "19", premiumSkuGoal: "30", premiumSkuAch: "15" },
-                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460000", mtdAch: "464486", ercTgt: "361", ercAch: "376", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "13" },
-                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "460000", mtdAch: "471219", ercTgt: "299", ercAch: "324", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "30", premiumSkuAch: "34" },
-                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "540000", mtdAch: "573449", ercTgt: "302", ercAch: "323", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "30", premiumSkuAch: "51" }
+                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550000", mtdAch: "109416", ercTgt: "445", ercAch: "162", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "45", premiumSkuAch: "1" },
+                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700000", mtdAch: "92786", ercTgt: "457", ercAch: "145", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "45", premiumSkuAch: "1" },
+                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4470000", mtdAch: "84106", ercTgt: "187", ercAch: "2", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "0" },
+                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "631000", mtdAch: "67097", ercTgt: "412", ercAch: "80", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "0" },
+                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580000", mtdAch: "103717", ercTgt: "463", ercAch: "160", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "45", premiumSkuAch: "5" },
+                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "680000", mtdAch: "129193", ercTgt: "343", ercAch: "131", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "7" },
+                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "690000", mtdAch: "136571", ercTgt: "450", ercAch: "153", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "11" },
+                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "760000", mtdAch: "218943", ercTgt: "475", ercAch: "169", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "21" },
+                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "660000", mtdAch: "127509", ercTgt: "290", ercAch: "125", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "9" },
+                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "740000", mtdAch: "185620", ercTgt: "352", ercAch: "153", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "20" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "600000", mtdAch: "92552", ercTgt: "377", ercAch: "48", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "2" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "880000", mtdAch: "0", ercTgt: "456", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "57", premiumSkuAch: "0" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1050000", mtdAch: "122613", ercTgt: "475", ercAch: "79", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "6" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "900000", mtdAch: "118742", ercTgt: "341", ercAch: "92", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "4" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850000", mtdAch: "148336", ercTgt: "352", ercAch: "101", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "58", premiumSkuAch: "2" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1120000", mtdAch: "139548", ercTgt: "351", ercAch: "94", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "7" },
+                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "900000", mtdAch: "98070", ercTgt: "351", ercAch: "75", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "57", premiumSkuAch: "5" },
+                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "629000", mtdAch: "127792", ercTgt: "320", ercAch: "106", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "60", premiumSkuAch: "25" },
+                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "634000", mtdAch: "153769", ercTgt: "385", ercAch: "219", sfTbrTgt: "100", sfTbrAch: "7", premiumSkuGoal: "60", premiumSkuAch: "10" },
+                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "806000", mtdAch: "183694", ercTgt: "317", ercAch: "130", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "11" },
+                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "812000", mtdAch: "151619", ercTgt: "326", ercAch: "123", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "8" },
+                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "521000", mtdAch: "175826", ercTgt: "340", ercAch: "151", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "60", premiumSkuAch: "10" },
+                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "702000", mtdAch: "125531", ercTgt: "388", ercAch: "149", sfTbrTgt: "100", sfTbrAch: "-1", premiumSkuGoal: "49", premiumSkuAch: "18" },
+                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "687000", mtdAch: "144745", ercTgt: "420", ercAch: "190", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "49", premiumSkuAch: "13" },
+                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "706000", mtdAch: "160087", ercTgt: "410", ercAch: "152", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "48", premiumSkuAch: "4" },
+                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "695000", mtdAch: "97470", ercTgt: "394", ercAch: "126", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "49", premiumSkuAch: "2" },
+                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "817000", mtdAch: "93873", ercTgt: "370", ercAch: "99", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "46", premiumSkuAch: "1" },
+                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "800000", mtdAch: "130008", ercTgt: "322", ercAch: "96", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "59", premiumSkuAch: "14" },
+                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1000000", mtdAch: "164609", ercTgt: "349", ercAch: "124", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "66", premiumSkuAch: "5" },
+                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "695000", mtdAch: "174125", ercTgt: "401", ercAch: "117", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "8" },
+                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "924000", mtdAch: "230600", ercTgt: "351", ercAch: "134", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "84", premiumSkuAch: "46" },
+                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "651000", mtdAch: "197852", ercTgt: "408", ercAch: "157", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "16" },
+                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1013000", mtdAch: "184311", ercTgt: "363", ercAch: "186", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "6" },
+                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888000", mtdAch: "214765", ercTgt: "422", ercAch: "97", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655000", mtdAch: "95522", ercTgt: "407", ercAch: "116", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "3" },
+                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645000", mtdAch: "71096", ercTgt: "409", ercAch: "87", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "6" },
+                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634000", mtdAch: "75575", ercTgt: "381", ercAch: "97", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581000", mtdAch: "96697", ercTgt: "409", ercAch: "105", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000166", dffName: "Delowar Hossain", sttTgt: "500000", mtdAch: "0", ercTgt: "383", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000167", dffName: "Ismail Hossain", sttTgt: "590000", mtdAch: "248599", ercTgt: "333", ercAch: "118", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "50", premiumSkuAch: "7" },
+                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000168", dffName: "Mehedi Alam", sttTgt: "470000", mtdAch: "16522", ercTgt: "387", ercAch: "12", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000169", dffName: "Niloy Sarker", sttTgt: "470000", mtdAch: "223002", ercTgt: "326", ercAch: "137", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "50", premiumSkuAch: "4" },
+                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000170", dffName: "Probal Mallik", sttTgt: "470000", mtdAch: "0", ercTgt: "406", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "584000", mtdAch: "62954", ercTgt: "398", ercAch: "207", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "30", premiumSkuAch: "1" },
+                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "417000", mtdAch: "17176", ercTgt: "409", ercAch: "205", sfTbrTgt: "100", sfTbrAch: "-1", premiumSkuGoal: "30", premiumSkuAch: "5" },
+                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "435000", mtdAch: "-16770", ercTgt: "348", ercAch: "202", sfTbrTgt: "100", sfTbrAch: "-1", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "415000", mtdAch: "194382", ercTgt: "360", ercAch: "155", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "50", premiumSkuAch: "1" },
+                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1540000", mtdAch: "194478", ercTgt: "263", ercAch: "94", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "0", premiumSkuAch: "0" },
+                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000171", dffName: "Anik Sen", sttTgt: "370000", mtdAch: "0", ercTgt: "427", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
+                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "490000", mtdAch: "171827", ercTgt: "347", ercAch: "200", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "50", premiumSkuAch: "17" },
+                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540000", mtdAch: "126429", ercTgt: "498", ercAch: "116", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "3" },
+                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460000", mtdAch: "102017", ercTgt: "547", ercAch: "133", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "30", premiumSkuAch: "0" },
+                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "490000", mtdAch: "104549", ercTgt: "279", ercAch: "104", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "13" },
+                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "510000", mtdAch: "92646", ercTgt: "276", ercAch: "113", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "30", premiumSkuAch: "15" }
             ];
             
             const fullSrData = rawSrData.map(sr => {
@@ -838,6 +636,7 @@
                 newSr.dffCode = sr.dffCode;
                 newSr.dffName = sr.dffName;
                 
+                // Parse original values
                 newSr.sttTgt = parseNumeric(sr.sttTgt);
                 newSr.sttAch = parseNumeric(sr.mtdAch);
                 
@@ -852,6 +651,7 @@
 
                 return newSr;
             });
+            // ------------------------------------------
 
             let processedTerritoryData = [];
             let processedDbData = [];
@@ -918,7 +718,15 @@
             function getAggregatedDailyData() {
                 const aggMap = new Map();
                 
-                dailyRawData.forEach(row => {
+                // Filter daily data based on selected dropdowns
+                const filteredDailyData = dailyRawData.filter(row => {
+                    const matchArea = selectedFilters.Area === 'All Areas' || row.AREA === selectedFilters.Area;
+                    const matchTerritory = selectedFilters.Territory === 'All Territories' || row.TERRITORY === selectedFilters.Territory;
+                    const matchDb = selectedFilters['DB Name'] === 'All DBs' || row.DISTRIBUTOR_NAME === selectedFilters['DB Name'];
+                    return matchArea && matchTerritory && matchDb;
+                });
+
+                filteredDailyData.forEach(row => {
                     const dateObj = new Date(row.calday);
                     const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }); 
                     const rawDate = row.calday;
@@ -962,7 +770,7 @@
                 return data;
             }
 
-            function populateDateWiseChart(ratio = 1, filterType = 'MTD') {
+            function populateDateWiseChart(ratio = 1, filterType = 'MTD', totalTarget = 0) {
                 const ctx = document.getElementById('comboChart');
                 if (!ctx) return; 
 
@@ -986,8 +794,12 @@
                     return d.dateObj.getDay() === 5 ? 'rgba(220, 38, 38, 1)' : 'rgba(17, 153, 142, 1)';
                 });
 
-                const scaledSales = chartDataRaw.map(d => d.sales * ratio);
-                const scaledErc = chartDataRaw.map(d => Math.round(d.erc * ratio));
+                // Calculate Daily RR (Target / 26 Working Days) converted to Lac
+                const dailyRrValue = (totalTarget / 26) / LAC_DIVISOR;
+                const rrData = new Array(labels.length).fill(dailyRrValue);
+
+                const scaledSales = chartDataRaw.map(d => d.sales); // No ratio needed now as we filter raw data
+                const scaledErc = chartDataRaw.map(d => d.erc);
 
                 if (comboChartInstance) {
                     comboChartInstance.destroy();
@@ -1018,6 +830,19 @@
                                     },
                                     offset: 4
                                 }
+                            },
+                            {
+                                label: `Daily RR: ${dailyRrValue.toFixed(2)}`, // Updated Label to show number
+                                data: rrData,
+                                type: 'line',
+                                borderColor: '#ef4444', // Red Color
+                                borderDash: [5, 5],
+                                borderWidth: 2,
+                                pointRadius: 0, // No dots
+                                fill: false,
+                                yAxisID: 'y',
+                                order: 0,
+                                datalabels: { display: false }
                             },
                             {
                                 label: 'Sales (Lac)', 
@@ -1053,7 +878,22 @@
                             }
                         },
                         plugins: {
-                            tooltip: { mode: 'index', intersect: false },
+                            tooltip: { 
+                                mode: 'index', 
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toFixed(2);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            },
                             legend: { position: 'bottom' },
                             datalabels: {
                                 display: true,
@@ -1121,15 +961,8 @@
                 updateSrStatus(filteredSrs); 
                 updateDbStatus(filteredDbs); 
 
-                let currentSttTotal = totals.sttAch; 
-                
-                if (globalSttAch > 0) {
-                    globalSttRatio = currentSttTotal / globalSttAch;
-                } else {
-                    globalSttRatio = 1;
-                }
-                // Use global ratio and currently active trend filter
-                populateDateWiseChart(globalSttRatio, activeTrendFilter);
+                // Pass the STT Target to the chart for RR calculation
+                populateDateWiseChart(1, activeTrendFilter, totals.sttTgt);
             }
 
             function initializeTrendButtons() {
@@ -1142,8 +975,16 @@
                         btn.classList.add('active');
                         // Set current filter state
                         activeTrendFilter = btn.getAttribute('data-filter');
-                        // Update chart using stored ratio
-                        populateDateWiseChart(globalSttRatio, activeTrendFilter);
+                        
+                        // Recalculate totals to get current target for RR
+                        let filteredSrs = [...fullSrData];
+                        if (selectedFilters.Area !== 'All Areas') filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
+                        if (selectedFilters.Territory !== 'All Territories') filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
+                        if (selectedFilters['DB Name'] !== 'All DBs') filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
+                        const totals = calculateGrandTotals(filteredSrs);
+
+                        // Update chart 
+                        populateDateWiseChart(1, activeTrendFilter, totals.sttTgt);
                     });
                 });
             }
@@ -1330,7 +1171,7 @@
                     timeElapsed: {
                         label: "Time Elapsed", 
                         percentage: timeElapsedPercent,
-                        valueText: "26 out of 26 Working Days Passed", 
+                        valueText: "7 out of 27 Working Days Passed", 
                         rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' },
                         isBenchmark: true
                     },
