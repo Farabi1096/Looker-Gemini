@@ -211,7 +211,7 @@
                 <!-- Territory STT Achievement Chart (Visible by default) -->
                 <div id="territory-chart-container" style="display: block;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Territory STT Achievement vs. Target</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span> (Ranked by Achievement)</p>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">25.9%</span> (Ranked by Achievement)</p>
                     <div id="stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
                     </div>
@@ -220,7 +220,7 @@
                 <!-- DB STT Achievement Chart (Hidden by default) -->
                 <div id="db-chart-container" style="display: none;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target (Aggregated)</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span> (Ranked by Achievement)</p>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">25.9%</span> (Ranked by Achievement)</p>
                     <div id="db-stt-chart" class="space-y-4">
                         <!-- Chart bars populated by JS -->
                     </div>
@@ -256,7 +256,7 @@
             <!-- Top 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span></p>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">25.9%</span></p>
                 <div id="top-10-sr-chart" class="space-y-4">
                     <!-- Top 10 SRs populated by JS -->
                 </div>
@@ -265,7 +265,7 @@
             <!-- Bottom 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">26.92%</span></p>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">25.9%</span></p>
                 <div id="bottom-10-sr-chart" class="space-y-4">
                     <!-- Bottom 10 SRs populated by JS -->
                 </div>
@@ -384,7 +384,7 @@
         // Register the DataLabels plugin
         Chart.register(ChartDataLabels);
 
-        const timeElapsedPercent = 26.92; // Benchmark updated to (7/26 days)
+        const timeElapsedPercent = 25.93; // Benchmark updated to (7/27 days)
         const LAC_DIVISOR = 100000;
         
         // Object to track current selections
@@ -485,7 +485,7 @@
             let comboChartInstance = null;
             let globalSttAch = 0;
             
-            // --- CHART DATA (NEW DATA from User Input - Dec 1st to Dec 8th ONLY) ---
+            // --- CHART DATA (NEW DATA from User Input) ---
             const dailyRawData = [
                 { calday: "12/1/2025", sales: 122502, erc: 101, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
                 { calday: "12/1/2025", sales: 82858, erc: 106, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
