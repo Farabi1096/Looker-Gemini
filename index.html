@@ -9,15 +9,16 @@
     <!-- Load Chart.js and DataLabels Plugin -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Load PapaParse for CSV reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f4f7f9;
         }
-        /* Custom Gradient Fill for Header (VIBRANT GREEN-TO-PURPLE) */
+        /* Custom Gradient Fill for Header */
         .header-gradient {
-            /* Vibrant Green (#11998e) to Deep Violet (#6a0dad) - approx. 120deg */
             background: linear-gradient(120deg, #11998e 0%, #6a0dad 100%); 
         }
 
@@ -25,20 +26,19 @@
             height: 10px;
             border-radius: 9999px;
             overflow: hidden;
-            background-color: #e5e7eb; /* Gray-200 */
+            background-color: #e5e7eb; 
         }
         .gauge-fill {
             transition: width 0.7s ease-out;
             border-radius: 9999px;
             height: 100%; 
         }
-        /* RAG Colors for Gauge Fill & Background */
-        .fill-green { background-color: #10b981; } /* Emerald-500 */
-        .fill-amber { background-color: #f59e0b; } /* Amber-500 */
-        .fill-red { background-color: #ef4444; } /* Red-500 */
-        .fill-blue { background-color: #3b82f6; } /* Blue-500 for benchmark */
+        /* RAG Colors */
+        .fill-green { background-color: #10b981; }
+        .fill-amber { background-color: #f59e0b; }
+        .fill-red { background-color: #ef4444; }
+        .fill-blue { background-color: #3b82f6; }
         
-        /* RAG Colors for Rings/Text */
         .ring-green { --tw-ring-color: #10b981; }
         .ring-amber { --tw-ring-color: #f59e0b; }
         .ring-red { --tw-ring-color: #ef4444; }
@@ -48,37 +48,34 @@
         .text-amber { color: #f59e0b; }
         .text-red { color: #ef4444; }
         .text-blue { color: #3b82f6; }
-        /* Added specific colors for comparison text */
         .text-red-600 { color: #dc2626; } 
         .text-green-600 { color: #059669; }
-
-        .text-gray-400 { color: #9ca3af; }
 
         .chart-bar {
             transition: width 0.7s ease-out;
             height: 100%;
-            min-width: 1rem; /* Minimum width for visibility */
+            min-width: 1rem;
         }
         
-        /* --- NEW TAB STYLES --- */
+        /* Tab Styles */
         .tab-button {
             padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* rounded-lg */
+            border-radius: 0.375rem; 
             font-weight: 500;
-            font-size: 0.875rem; /* text-sm */
+            font-size: 0.875rem; 
             transition: all 0.2s ease-in-out;
             border: 2px solid transparent;
             cursor: pointer;
         }
         .tab-active {
             background-color: white;
-            color: #11998e; /* Match header green */
+            color: #11998e; 
             font-weight: 700;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .tab-inactive {
             background-color: transparent;
-            color: #f4f7f9; /* Light text */
+            color: #f4f7f9;
             opacity: 0.8;
             border-color: rgba(255, 255, 255, 0.2);
         }
@@ -103,138 +100,125 @@
             border-color: #d1d5db;
         }
         .trend-btn.active {
-            background-color: #6a0dad; /* Purple */
+            background-color: #6a0dad; 
             color: white;
             border-color: #6a0dad;
         }
         
-        /* Fix for sticky column alignment in table */
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #11998e;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Fix for sticky column */
         @media (min-width: 1024px) {
             .min-w-full th:first-child,
             .min-w-full td:first-child {
                 position: sticky;
                 left: 0;
                 z-index: 10;
-                box-shadow: 2px 0 3px -1px rgba(0, 0, 0, 0.05); /* subtle shadow for separation */
+                box-shadow: 2px 0 3px -1px rgba(0, 0, 0, 0.05); 
             }
             .min-w-full td:first-child {
                 background-color: white;
             }
             .min-w-full tfoot td:first-child {
-                 background-color: #f3f4f6; /* Gray-100 */
+                 background-color: #f3f4f6; 
             }
         }
-        
     </style>
 </head>
 <body class="p-4 sm:p-8">
 
-    <div id="app" class="max-w-7xl mx-auto">
+    <!-- Loading Screen -->
+    <div id="loading-overlay">
+        <div class="spinner mb-4"></div>
+        <h2 class="text-xl font-bold text-gray-700">Connecting to Live Data...</h2>
+        <p class="text-sm text-gray-500">Fetching from Google Sheets</p>
+        <p id="error-details" class="text-xs text-red-500 mt-2 hidden"></p>
+    </div>
 
-        <!-- Header: Title, Subtitle, and Filter Controls -->
+    <div id="app" class="max-w-7xl mx-auto" style="display: none;">
+
+        <!-- Header -->
         <header class="header-gradient p-6 rounded-xl shadow-xl mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border border-gray-200">
             <div class="mb-4 xl:mb-0">
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white">SPARTA MTD Sales Performance</h1>
-                <!-- UPDATED DATE -->
-                <p class="text-lg text-gray-200 mt-1">(Data as of Dec 10th, 2025)</p>
+                <p id="data-date" class="text-lg text-gray-200 mt-1">(Data as of...)</p>
             </div>
             
-            <!-- Filter Dropdowns Section (Compact layout) -->
             <div id="filter-controls" class="flex flex-wrap gap-2 p-2 bg-gray-900/10 rounded-lg shadow-inner border border-gray-400">
-                <!-- Dropdowns will be dynamically inserted here by JavaScript -->
+                <!-- Dropdowns inserted by JS -->
             </div>
         </header>
 
-        <!-- KPI Cards Section (5 Cards) -->
-        <div id="kpi-cards" class="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-6">
-            <!-- Cards will be dynamically inserted here -->
-        </div>
+        <!-- KPI Cards -->
+        <div id="kpi-cards" class="grid grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-6"></div>
 
-        <!-- NEW TAB CONTROLS (MOVED HERE) -->
+        <!-- Tab Controls -->
         <div class="flex justify-center mb-6 z-10 relative">
             <div class="flex p-1 bg-gray-700/30 rounded-lg shadow-md backdrop-blur-sm">
-                <button id="tab-territory" class="tab-button tab-active">
-                    Territory Update
-                </button>
-                <button id="tab-db" class="tab-button tab-inactive">
-                    DB Update
-                </button>
-                <button id="tab-sr" class="tab-button tab-inactive">
-                    DFF Update
-                </button>
+                <button id="tab-territory" class="tab-button tab-active">Territory Update</button>
+                <button id="tab-db" class="tab-button tab-inactive">DB Update</button>
+                <button id="tab-sr" class="tab-button tab-inactive">DFF Update</button>
             </div>
         </div>
 
-        <!-- Section 2: Visuals (Toggled Panels) -->
-        
-        <!-- Visuals Panel 1: Main (DB/SR Health & Territory/DB Chart) -->
+        <!-- Visuals Panel 1: Main -->
         <div id="visuals-panel-main" style="display: grid;" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
 
-            <!-- Performance Status (DB & SR) -->
+            <!-- Performance Status -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Performance Status (DB & SR)</h2>
                 <p class="text-sm text-gray-500 mb-4">No. of performers Above 90%, 85-90%, and Below 85% of Time elapsed %.</p>
-                
-                <!-- SR Status: This will be dynamically updated by updateSrStatus() -->
-                <div id="sr-health" class="mb-6 border-b pb-4 border-gray-100">
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">SR Status (Total: 0)</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: 0%;">0</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: 0%; min-width: 1.5rem;">0</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: 0%;">0</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: 0</span>
-                        <span class="text-amber">85-90%: 0</span>
-                        <span class="text-red">Below 85%: 0</span>
-                    </div>
-                </div>
-
-                <!-- DB Status: This will be dynamically updated by updateDbStatus() -->
-                <div id="db-health">
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">DB Status (Total: 0)</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: 0%;">0</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: 0%; min-width: 1.5rem;">0</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: 0%;">0</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: 0</span>
-                        <span class="text-amber">85-90%: 0</span>
-                        <span class="text-red">Below 85%: 0</span>
-                    </div>
-                </div>
+                <div id="sr-health" class="mb-6 border-b pb-4 border-gray-100"></div>
+                <div id="db-health"></div>
             </div>
 
-            <!-- Chart Section (Toggles between Territory and DB) -->
+            <!-- Chart Section -->
             <div class="lg:col-span-2">
-                <!-- Territory STT Achievement Chart (Visible by default) -->
                 <div id="territory-chart-container" style="display: block;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Territory STT Achievement vs. Target</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">33.33%</span> (Ranked by Achievement)</p>
-                    <div id="stt-chart" class="space-y-4">
-                        <!-- Chart bars populated by JS -->
-                    </div>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue benchmark-text"></span> (Ranked by Achievement)</p>
+                    <div id="stt-chart" class="space-y-4"></div>
                 </div>
 
-                <!-- DB STT Achievement Chart (Hidden by default) -->
                 <div id="db-chart-container" style="display: none;" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">DB STT Achievement vs. Target (Aggregated)</h2>
-                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">33.33%</span> (Ranked by Achievement)</p>
-                    <div id="db-stt-chart" class="space-y-4">
-                        <!-- Chart bars populated by JS -->
-                    </div>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue benchmark-text"></span> (Ranked by Achievement)</p>
+                    <div id="db-stt-chart" class="space-y-4"></div>
                 </div>
             </div>
 
-            <!-- NEW COMBO CHART SECTION (Spans full width in this panel) -->
+            <!-- Combo Chart -->
             <div id="combo-chart-section" class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800">Daily Sales vs. ERC Trend</h2>
                         <p class="text-sm text-gray-500">Day-wise trend of STT Achievement (Line) vs. ERC Achievement (Column).</p>
                     </div>
-                    <!-- Trend Filter Buttons -->
                     <div class="flex flex-wrap gap-2" id="trend-buttons">
                         <button class="trend-btn active" data-filter="MTD">MTD</button>
                         <button class="trend-btn" data-filter="L3D">L3D</button>
@@ -250,168 +234,83 @@
             </div>
         </div>
 
-        <!-- Visuals Panel 2: SR View (Top/Bottom 10) -->
+        <!-- Visuals Panel 2: SR View -->
         <div id="visuals-panel-sr" style="display: none;" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-            
-            <!-- Top 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Top 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">33.33%</span></p>
-                <div id="top-10-sr-chart" class="space-y-4">
-                    <!-- Top 10 SRs populated by JS -->
-                </div>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue benchmark-text"></span></p>
+                <div id="top-10-sr-chart" class="space-y-4"></div>
             </div>
-            
-            <!-- Bottom 10 SR Chart -->
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h2 class="text-xl font-bold text-gray-800 mb-4">Bottom 10 DFF Nationally (by STT Ach %)</h2>
-                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue">33.33%</span></p>
-                <div id="bottom-10-sr-chart" class="space-y-4">
-                    <!-- Bottom 10 SRs populated by JS -->
-                </div>
+                <p class="text-sm font-semibold text-gray-500 mb-4">Time Elapsed Target: <span class="text-blue benchmark-text"></span></p>
+                <div id="bottom-10-sr-chart" class="space-y-4"></div>
             </div>
-            
         </div>
 
-        <!-- TAB PANELS WRAPPER -->
+        <!-- Tables -->
         <div id="tab-panels">
-
-            <!-- Panel 1: Territory (Visible by default) -->
             <div id="panel-territory" style="display: block;">
-                <!-- Section 3: Detailed Territory Table -->
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed Territory Performance MTD</h2>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">Territory</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="territory-list" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be populated here by JavaScript -->
-                            </tbody>
-                            <!-- Grand Total Row will be appended here by JS -->
-                        </table>
-                    </div>
+                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-20">Territory</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT TGT (Lac)</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT Ach (Lac)</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU Ach %</th></tr></thead><tbody id="territory-list" class="bg-white divide-y divide-gray-200"></tbody></table></div>
                 </div>
             </div>
             
-            <!-- Panel 2: DB (Hidden by default) -->
             <div id="panel-db" style="display: none;">
-                <!-- Section 4: Detailed DB Table -->
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DB Performance MTD (Aggregated)</h2>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">DB Name</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="db-list" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be populated here by JavaScript -->
-                            </tbody>
-                            <!-- Grand Total Row will be appended here by JS -->
-                        </table>
-                    </div>
+                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-20">DB Name</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT TGT (Lac)</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT Ach (Lac)</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU Ach %</th></tr></thead><tbody id="db-list" class="bg-white divide-y divide-gray-200"></tbody></table></div>
                 </div>
             </div>
 
-            <!-- Panel 3: SR (Hidden by default) -->
             <div id="panel-sr" style="display: none;">
-                <!-- Section 5: Detailed SR Table -->
                 <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-10">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Detailed DFF Performance MTD</h2>
-
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th scope="col" class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-20">DFF Name</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT TGT (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach (Lac)</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">STT Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">ERC Ach %</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">SF TBR Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU TGT</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach</th>
-                                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">P.SKU Ach %</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sr-list" class="bg-white divide-y divide-gray-200">
-                                <!-- Data will be populated here by JavaScript -->
-                            </tbody>
-                            <!-- Grand Total Row will be appended here by JS -->
-                        </table>
-                    </div>
+                    <div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase sticky left-0 bg-gray-50 z-20">DFF Name</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT TGT (Lac)</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT Ach (Lac)</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">STT Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">ERC Ach %</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">SF TBR Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU TGT</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU Ach</th><th class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase">P.SKU Ach %</th></tr></thead><tbody id="sr-list" class="bg-white divide-y divide-gray-200"></tbody></table></div>
                 </div>
             </div>
-        </div> <!-- End of Tab Panels Wrapper -->
+        </div>
     </div>
 
     <script>
-        // --- GLOBAL HELPER FUNCTIONS (Moved outside DOMContentLoaded) ---
-        
-        // Register the DataLabels plugin
         Chart.register(ChartDataLabels);
 
-        const timeElapsedPercent = 33.33; // Benchmark updated to (9/27 days)
+        // --- URLS UPDATED ---
+        const MTD_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSW3e0Hgotn4crFK1ac2osytnFt7jaWlVSV5a1BURK-3zLU_Q9-LxbyTuCCMLa4tbO3-9nLhttdk-1v/pub?output=csv';
+        // Converted pubhtml link to fetchable CSV link with GID
+        const CHART_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSW3e0Hgotn4crFK1ac2osytnFt7jaWlVSV5a1BURK-3zLU_Q9-LxbyTuCCMLa4tbO3-9nLhttdk-1v/pub?gid=573142787&single=true&output=csv';
+
+        const timeElapsedPercent = 34.6; 
+        const daysPassed = "9 out of 26";
         const LAC_DIVISOR = 100000;
         
-        // Object to track current selections
         let selectedFilters = {
             'Area': 'All Areas',
             'Territory': 'All Territories',
             'DB Name': 'All DBs'
         };
         
-        let activeTab = 'territory'; // To track current tab state
-        let activeTrendFilter = 'MTD'; // Track trend filter state
-        let globalSttRatio = 1; // Global ratio for trend chart scaling
+        let activeTab = 'territory';
+        let activeTrendFilter = 'MTD';
+        let globalSttRatio = 1;
         
-        // Global references to filter <select> elements
         let areaSelect, territorySelect, dbNameSelect;
+        let comboChartInstance = null;
 
+        let rawSrData = [];
+        let dailyRawData = [];
+        let processedTerritoryData = [];
+        let processedDbData = [];
+
+        // Parse Helper
         function parseNumeric(value) {
-            if (typeof value === 'number') {
-                return value;
-            }
+            if (typeof value === 'number') return value;
             if (typeof value === 'string') {
-                // Check if it has 'k' (e.g., 50k)
                 if (value.toLowerCase().includes('k')) {
                     const number = parseFloat(value.toLowerCase().replace('k', '').replace(/,/g, ''));
                     return isNaN(number) ? 0 : number * 1000; 
                 }
-                // Remove commas, percentage signs, and then convert to float
                 const cleanedValue = value.replace(/,/g, '').replace(/%/g, '');
                 const number = parseFloat(cleanedValue);
                 return isNaN(number) ? 0 : number;
@@ -430,14 +329,9 @@
         function getRAGStatus(percentage) {
             const benchmarkHigh = timeElapsedPercent * 0.90;
             const benchmarkLow = timeElapsedPercent * 0.85;
-            
-            if (percentage >= benchmarkHigh) { 
-                return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
-            } else if (percentage >= benchmarkLow) { 
-                return { color: 'fill-amber', text: 'Amber', ring: 'ring-amber', textColor: 'text-amber' };
-            } else { 
-                return { color: 'fill-red', text: 'Red', ring: 'ring-red', textColor: 'text-red' };
-            }
+            if (percentage >= benchmarkHigh) return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
+            else if (percentage >= benchmarkLow) return { color: 'fill-amber', text: 'Amber', ring: 'ring-amber', textColor: 'text-amber' };
+            else return { color: 'fill-red', text: 'Red', ring: 'ring-red', textColor: 'text-red' };
         }
 
         function formatInLac(amount) {
@@ -445,15 +339,11 @@
         }
 
         function formatCount(amount) {
-            const roundedAmount = Math.round(amount);
-            return roundedAmount.toLocaleString('en-US', { maximumFractionDigits: 0 });
+            return Math.round(amount).toLocaleString('en-US', { maximumFractionDigits: 0 });
         }
         
         function formatValue(value, unit) {
-            if (unit === "Lac") { 
-                return formatInLac(value);
-            }
-            return formatCount(value);
+            return unit === "Lac" ? formatInLac(value) : formatCount(value);
         }
 
         function calculateGrandTotals(dataArray) {
@@ -461,1370 +351,592 @@
                 sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0, 
                 sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
             };
-
             dataArray.forEach(data => {
                 for (const key in totals) {
                     const val = parseNumeric(data[key]);
-                    if (!isNaN(val)) {
-                         totals[key] += val;
-                    }
+                    if (!isNaN(val)) totals[key] += val;
                 }
             });
-
             totals.sttAchPercent = (totals.sttTgt > 0) ? (totals.sttAch / totals.sttTgt) * 100 : 0;
             totals.ercAchPercent = (totals.ercTgt > 0) ? (totals.ercAch / totals.ercTgt) * 100 : 0;
             totals.sfTbrAchPercent = (totals.sfTbrTgt > 0) ? (totals.sfTbrAch / totals.sfTbrTgt) * 100 : 0;
             totals.premiumSkuAchPercent = (totals.premiumSkuGoal > 0) ? (totals.premiumSkuAch / totals.premiumSkuGoal) * 100 : 0;
-            
             return totals;
         }
 
-        // Main initialization within DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', () => {
+        // --- FETCHING LOGIC (With Proxy Fallback) ---
+        async function fetchCsvData(url) {
+            const timestampedUrl = `${url}&t=${Date.now()}`;
             
-            let comboChartInstance = null;
-            let globalSttAch = 0;
-            
-            // --- CHART DATA (NEW DATA from User Input) ---
-            const dailyRawData = [
-                { calday: "12/1/2025", sales: 122502, erc: 101, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/1/2025", sales: 82858, erc: 106, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/1/2025", sales: 80351, erc: 123, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/1/2025", sales: 77863, erc: 51, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/1/2025", sales: 149878, erc: 113, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/1/2025", sales: 125215, erc: 120, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/1/2025", sales: 114841, erc: 133, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/1/2025", sales: 34717, erc: 48, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/1/2025", sales: 41380, erc: 45, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/1/2025", sales: 23212, erc: 30, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/1/2025", sales: 103207, erc: 92, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/1/2025", sales: 59216, erc: 35, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/2/2025", sales: 144277, erc: 123, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/2/2025", sales: 88083, erc: 110, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/2/2025", sales: 55655, erc: 95, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/2/2025", sales: 79738, erc: 69, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/2/2025", sales: 79593, erc: 91, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/2/2025", sales: 103129, erc: 164, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/2/2025", sales: 78606, erc: 65, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/2/2025", sales: -205237, erc: 376, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/2/2025", sales: 31354, erc: 38, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/2/2025", sales: 22779, erc: 32, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/2/2025", sales: 8412, erc: 218, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/2/2025", sales: 93412, erc: 50, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/3/2025", sales: 108226, erc: 65, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/3/2025", sales: 67332, erc: 96, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/3/2025", sales: 52717, erc: 76, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/3/2025", sales: 62466, erc: 49, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/3/2025", sales: 126127, erc: 90, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/3/2025", sales: 34911, erc: 141, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/3/2025", sales: 86380, erc: 59, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/3/2025", sales: 41478, erc: 71, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/3/2025", sales: 23792, erc: 34, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/3/2025", sales: 32974, erc: 41, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/3/2025", sales: 162081, erc: 153, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/3/2025", sales: 42144, erc: 37, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/4/2025", sales: 127935, erc: 123, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/4/2025", sales: 81399, erc: 91, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/4/2025", sales: 82141, erc: 82, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/4/2025", sales: 145250, erc: 99, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/4/2025", sales: 102863, erc: 119, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/4/2025", sales: 137356, erc: 101, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/4/2025", sales: 85743, erc: 70, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/4/2025", sales: 56327, erc: 69, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/4/2025", sales: 143185, erc: 95, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/4/2025", sales: 99696, erc: 44, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/6/2025", sales: 129842, erc: 112, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/6/2025", sales: 75971, erc: 41, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/6/2025", sales: 102445, erc: 94, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/6/2025", sales: 135342, erc: 125, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/6/2025", sales: 68337, erc: 81, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/6/2025", sales: 65911, erc: 81, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/6/2025", sales: 23186, erc: 21, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/6/2025", sales: 113591, erc: 107, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/6/2025", sales: 36637, erc: 10, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/7/2025", sales: 180895, erc: 144, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/7/2025", sales: 80932, erc: 104, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/7/2025", sales: 102101, erc: 61, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/7/2025", sales: 112438, erc: 139, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/7/2025", sales: 78044, erc: 125, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/7/2025", sales: 97796, erc: 63, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/7/2025", sales: 67988, erc: 78, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/7/2025", sales: 27990, erc: 26, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/7/2025", sales: 40646, erc: 38, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/7/2025", sales: 155018, erc: 120, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/7/2025", sales: 82034, erc: 55, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/8/2025", sales: 137821, erc: 137, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/8/2025", sales: 233984, erc: 99, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/8/2025", sales: 105327, erc: 74, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/8/2025", sales: 176473, erc: 122, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/8/2025", sales: 124493, erc: 106, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/8/2025", sales: 178703, erc: 155, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/8/2025", sales: 97320, erc: 70, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/8/2025", sales: -251, erc: 75, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/8/2025", sales: 38018, erc: 41, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/8/2025", sales: 54398, erc: 55, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/8/2025", sales: 66221, erc: 218, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/8/2025", sales: 74984, erc: 52, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/9/2025", sales: 139695, erc: 103, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/9/2025", sales: 152651, erc: 135, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/9/2025", sales: 129530, erc: 73, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/9/2025", sales: 163588, erc: 102, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/9/2025", sales: 93827, erc: 79, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/9/2025", sales: 35559, erc: 95, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/9/2025", sales: 78932, erc: 42, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/9/2025", sales: 24772, erc: 26, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/9/2025", sales: 28469, erc: 36, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/9/2025", sales: 18212, erc: 11, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/9/2025", sales: 178407, erc: 126, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/9/2025", sales: 94147, erc: 46, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" },
-                { calday: "12/10/2025", sales: 200879, erc: 106, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Takwa Enterprise" },
-                { calday: "12/10/2025", sales: 166000, erc: 125, AREA: "DHAKA", TERRITORY: "DHAKA SOUTH", DISTRIBUTOR_NAME: "M/S Sanuar Enterprise" },
-                { calday: "12/10/2025", sales: 276136, erc: 65, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation" },
-                { calday: "12/10/2025", sales: 278301, erc: 120, AREA: "DHAKA", TERRITORY: "DHAKA NORTH MIRPUR", DISTRIBUTOR_NAME: "Paragon Marketing Limited" },
-                { calday: "12/10/2025", sales: 112496, erc: 107, AREA: "DHAKA", TERRITORY: "DHAKA WEST", DISTRIBUTOR_NAME: "M/S Hasan Brothers Corporation 2" },
-                { calday: "12/10/2025", sales: 266921, erc: 231, AREA: "DHAKA", TERRITORY: "DHAKA NORTH UTTARA", DISTRIBUTOR_NAME: "Self Tech Marketing Ltd" },
-                { calday: "12/10/2025", sales: 89093, erc: 74, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "ARC Trading" },
-                { calday: "12/10/2025", sales: 58893, erc: 75, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "M/S Farid Enterprise" },
-                { calday: "12/10/2025", sales: 13522, erc: 37, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "P M Traders" },
-                { calday: "12/10/2025", sales: 19434, erc: 2, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Madina Traders" },
-                { calday: "12/10/2025", sales: 122206, erc: 134, AREA: "DHAKA", TERRITORY: "DHAKA EAST", DISTRIBUTOR_NAME: "Unitrust Trading Co." },
-                { calday: "12/10/2025", sales: 60473, erc: 43, AREA: "CTG", TERRITORY: "CTG NORTH & SOUTH", DISTRIBUTOR_NAME: "Next Associates" }
-            ];
+            // Strategy 1: CorsProxy.io (Best for simple CORS bypass)
+            try {
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(timestampedUrl)}`;
+                const response = await fetch(proxyUrl);
+                if (response.ok) {
+                    const text = await response.text();
+                    // Validate basic CSV structure to ensure we didn't get an HTML error page
+                    if (text.trim().length > 0 && !text.trim().toLowerCase().startsWith('<!doctype')) {
+                        return parseCsv(text);
+                    }
+                }
+            } catch (e) { console.warn("CorsProxy failed, trying next...", e); }
 
-            // NEW RAW DATASET (Updated from user input)
-            const rawSrData = [
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000025", dffName: "Emon", sttTgt: "550000", mtdAch: "147528", ercTgt: "445", ercAch: "196", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "45", premiumSkuAch: "1" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000022", dffName: "Mehedi", sttTgt: "700000", mtdAch: "227395", ercTgt: "457", ercAch: "179", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "45", premiumSkuAch: "1" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000021", dffName: "Miraz", sttTgt: "4470000", mtdAch: "112142", ercTgt: "187", ercAch: "2", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000023", dffName: "Rubel", sttTgt: "631000", mtdAch: "221849", ercTgt: "412", ercAch: "98", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "45", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "CHAWKBAZAR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B004", dhName: "M/S Hasan Brothers Corporation", dffCode: "BDS0000024", dffName: "Parvez", sttTgt: "580000", mtdAch: "153874", ercTgt: "463", ercAch: "210", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "45", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000016", dffName: "Al Amin", sttTgt: "680000", mtdAch: "180629", ercTgt: "343", ercAch: "170", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000017", dffName: "Hasib", sttTgt: "690000", mtdAch: "173335", ercTgt: "450", ercAch: "185", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "16" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000018", dffName: "Siam", sttTgt: "760000", mtdAch: "252648", ercTgt: "475", ercAch: "213", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "31" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000019", dffName: "Rabbi", sttTgt: "660000", mtdAch: "180090", ercTgt: "290", ercAch: "142", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "18" },
-                { area: "DHAKA", town: "MOHAMMADPUR", territory: "DHAKA WEST", tm: "NOOR MD. HABIBULLAH", lead: "JAYANTA BANIK", dhCode: "B007", dhName: "M/S Hasan Brothers Corporation 2", dffCode: "BDS0000020", dffName: "Forhad", sttTgt: "740000", mtdAch: "217458", ercTgt: "352", ercAch: "188", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "27" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000054", dffName: "Nasim", sttTgt: "600000", mtdAch: "147030", ercTgt: "377", ercAch: "79", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "2" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000055", dffName: "Asad", sttTgt: "880000", mtdAch: "32496", ercTgt: "456", ercAch: "30", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "57", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000056", dffName: "Rony", sttTgt: "1050000", mtdAch: "168153", ercTgt: "475", ercAch: "107", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "57", premiumSkuAch: "6" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000057", dffName: "Toriqul", sttTgt: "900000", mtdAch: "203228", ercTgt: "341", ercAch: "116", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "7" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000058", dffName: "Salim", sttTgt: "850000", mtdAch: "217172", ercTgt: "352", ercAch: "122", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "58", premiumSkuAch: "7" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000059", dffName: "Tamim", sttTgt: "1120000", mtdAch: "173286", ercTgt: "351", ercAch: "112", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "57", premiumSkuAch: "7" },
-                { area: "DHAKA", town: "MIRPUR", territory: "DHAKA NORTH MIRPUR", tm: "FARHAN MORSHED KHAN", lead: "JAYANTA BANIK", dhCode: "B006", dhName: "Paragon Marketing Limited", dffCode: "BDS0000060", dffName: "Limon", sttTgt: "900000", mtdAch: "220384", ercTgt: "351", ercAch: "102", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "57", premiumSkuAch: "6" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000061", dffName: "Fahim", sttTgt: "629000", mtdAch: "124668", ercTgt: "320", ercAch: "106", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "60", premiumSkuAch: "25" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000062", dffName: "Alif", sttTgt: "634000", mtdAch: "245570", ercTgt: "385", ercAch: "282", sfTbrTgt: "100", sfTbrAch: "14", premiumSkuGoal: "60", premiumSkuAch: "16" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000063", dffName: "Mahi", sttTgt: "806000", mtdAch: "259862", ercTgt: "317", ercAch: "183", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "60", premiumSkuAch: "11" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000064", dffName: "Akram", sttTgt: "812000", mtdAch: "252475", ercTgt: "326", ercAch: "141", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "60", premiumSkuAch: "14" },
-                { area: "DHAKA", town: "UTTARA", territory: "DHAKA NORTH UTTARA", tm: "NURUL ALAM", lead: "JAYANTA BANIK", dhCode: "B008", dhName: "Self Tech Marketing Ltd", dffCode: "BDS0000065", dffName: "Krishno", sttTgt: "521000", mtdAch: "212606", ercTgt: "340", ercAch: "170", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "60", premiumSkuAch: "12" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000070", dffName: "Mohidul islam", sttTgt: "702000", mtdAch: "181274", ercTgt: "388", ercAch: "198", sfTbrTgt: "100", sfTbrAch: "-1", premiumSkuGoal: "49", premiumSkuAch: "19" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000071", dffName: "Abul Kalam", sttTgt: "687000", mtdAch: "182243", ercTgt: "420", ercAch: "227", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "49", premiumSkuAch: "14" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000072", dffName: "MD. Shahed Mia", sttTgt: "706000", mtdAch: "188082", ercTgt: "410", ercAch: "170", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "48", premiumSkuAch: "4" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000073", dffName: "Saiful Islam Siam", sttTgt: "695000", mtdAch: "112234", ercTgt: "394", ercAch: "138", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "49", premiumSkuAch: "3" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000074", dffName: "MD. Iqbal Khan", sttTgt: "817000", mtdAch: "143118", ercTgt: "370", ercAch: "118", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "46", premiumSkuAch: "3" },
-                { area: "DHAKA", town: "KHILGAON", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B014", dhName: "Unitrust Trading Co.", dffCode: "BDS0000075", dffName: "MD. Forhad Hasan", sttTgt: "800000", mtdAch: "245375", ercTgt: "322", ercAch: "128", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "59", premiumSkuAch: "32" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000006", dffName: "Parvez Rifayaz", sttTgt: "1000000", mtdAch: "263210", ercTgt: "349", ercAch: "154", sfTbrTgt: "100", sfTbrAch: "5", premiumSkuGoal: "66", premiumSkuAch: "17" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000007", dffName: "Sobuj Hossain", sttTgt: "695000", mtdAch: "243953", ercTgt: "401", ercAch: "148", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "50", premiumSkuAch: "13" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000008", dffName: "Borhan Uddin", sttTgt: "924000", mtdAch: "271067", ercTgt: "351", ercAch: "155", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "84", premiumSkuAch: "53" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000009", dffName: "Saiful Islam Rohan", sttTgt: "651000", mtdAch: "260233", ercTgt: "408", ercAch: "196", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "20" },
-                { area: "DHAKA", town: "GULSHAN", territory: "DHAKA EAST", tm: "MESBA RAHMAN", lead: "JAYANTA BANIK", dhCode: "B002", dhName: "Takwa Enterprise", dffCode: "BDS0000010", dffName: "Zahangir Alom", sttTgt: "1013000", mtdAch: "253608", ercTgt: "363", ercAch: "236", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "6" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000011", dffName: "Hasib", sttTgt: "888000", mtdAch: "272808", ercTgt: "422", ercAch: "133", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000012", dffName: "Sajid", sttTgt: "655000", mtdAch: "119982", ercTgt: "407", ercAch: "131", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "3" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000013", dffName: "Shawon", sttTgt: "645000", mtdAch: "195278", ercTgt: "409", ercAch: "178", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "50", premiumSkuAch: "10" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000014", dffName: "Sunny", sttTgt: "634000", mtdAch: "110063", ercTgt: "381", ercAch: "128", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "50", premiumSkuAch: "0" },
-                { area: "DHAKA", town: "JATRABARI", territory: "DHAKA SOUTH", tm: "RAYHAN MASUD", lead: "JAYANTA BANIK", dhCode: "B003", dhName: "M/S Sanuar Enterprise", dffCode: "BDS0000015", dffName: "Alamin", sttTgt: "581000", mtdAch: "174175", ercTgt: "409", ercAch: "137", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "15" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000166", dffName: "Delowar Hossain", sttTgt: "500000", mtdAch: "0", ercTgt: "383", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000167", dffName: "Ismail Hossain", sttTgt: "590000", mtdAch: "296046", ercTgt: "333", ercAch: "122", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "50", premiumSkuAch: "9" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000168", dffName: "Mehedi Alam", sttTgt: "470000", mtdAch: "60389", ercTgt: "387", ercAch: "47", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000169", dffName: "Niloy Sarker", sttTgt: "470000", mtdAch: "286308", ercTgt: "326", ercAch: "158", sfTbrTgt: "100", sfTbrAch: "4", premiumSkuGoal: "50", premiumSkuAch: "4" },
-                { area: "CTG", town: "MURADPUR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B015", dhName: "Next Associates", dffCode: "BDS0000170", dffName: "Probal Mallik", sttTgt: "470000", mtdAch: "0", ercTgt: "406", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000045", dffName: "Arafat Hossain Musa", sttTgt: "584000", mtdAch: "93719", ercTgt: "398", ercAch: "232", sfTbrTgt: "100", sfTbrAch: "1", premiumSkuGoal: "30", premiumSkuAch: "1" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000046", dffName: "Tanvir Ahmed", sttTgt: "417000", mtdAch: "40454", ercTgt: "409", ercAch: "237", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "30", premiumSkuAch: "5" },
-                { area: "CTG", town: "CUMILLA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B010", dhName: "M/S Farid Enterprise", dffCode: "BDS0000047", dffName: "Shakkhor Majumdar", sttTgt: "435000", mtdAch: "12851", ercTgt: "348", ercAch: "216", sfTbrTgt: "100", sfTbrAch: "-1", premiumSkuGoal: "50", premiumSkuAch: "1" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000038", dffName: "Tipu Das", sttTgt: "415000", mtdAch: "248117", ercTgt: "360", ercAch: "211", sfTbrTgt: "100", sfTbrAch: "6", premiumSkuGoal: "50", premiumSkuAch: "1" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000039", dffName: "MD Abdul Malek", sttTgt: "1540000", mtdAch: "268894", ercTgt: "263", ercAch: "109", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "0", premiumSkuAch: "0" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000171", dffName: "Anik Sen", sttTgt: "370000", mtdAch: "0", ercTgt: "427", ercAch: "0", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "50", premiumSkuAch: "0" },
-                { area: "CTG", town: "KOTOWALI", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B009", dhName: "ARC Trading", dffCode: "BDS0000040", dffName: "Aiyas Ibne Abedin", sttTgt: "490000", mtdAch: "211702", ercTgt: "347", ercAch: "237", sfTbrTgt: "100", sfTbrAch: "2", premiumSkuGoal: "50", premiumSkuAch: "19" },
-                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000066", dffName: "Md Arshad", sttTgt: "540000", mtdAch: "146668", ercTgt: "498", ercAch: "138", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "3" },
-                { area: "CTG", town: "HALISHAHAR", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B012", dhName: "P M Traders", dffCode: "BDS0000067", dffName: "Md Forhad", sttTgt: "460000", mtdAch: "123769", ercTgt: "547", ercAch: "161", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "30", premiumSkuAch: "2" },
-                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000068", dffName: "Md Shojibul Islam", sttTgt: "490000", mtdAch: "122762", ercTgt: "279", ercAch: "107", sfTbrTgt: "100", sfTbrAch: "3", premiumSkuGoal: "30", premiumSkuAch: "13" },
-                { area: "CTG", town: "PATENGA", territory: "CTG NORTH & SOUTH", tm: "MONIRUZZAMAN MONIR", lead: "SHAJED KIBRIA", dhCode: "B013", dhName: "Madina Traders", dffCode: "BDS0000069", dffName: "Md Ariful Islam", sttTgt: "510000", mtdAch: "112080", ercTgt: "276", ercAch: "115", sfTbrTgt: "100", sfTbrAch: "0", premiumSkuGoal: "30", premiumSkuAch: "15" }
-            ];
-            
-            const fullSrData = rawSrData.map(sr => {
-                const newSr = {};
-                newSr.area = sr.area;
-                newSr.territory = sr.territory;
-                newSr.tm = sr.tm;
-                newSr.lead = sr.lead;
-                newSr.dhCode = sr.dhCode; 
-                newSr.dhName = sr.dhName;
-                newSr.dffCode = sr.dffCode;
-                newSr.dffName = sr.dffName;
-                
-                // Parse original values
-                newSr.sttTgt = parseNumeric(sr.sttTgt);
-                newSr.sttAch = parseNumeric(sr.mtdAch);
-                
-                newSr.ercTgt = parseNumeric(sr.ercTgt);
-                newSr.ercAch = parseNumeric(sr.ercAch);
-                
-                newSr.sfTbrTgt = parseNumeric(sr.sfTbrTgt);
-                newSr.sfTbrAch = parseNumeric(sr.sfTbrAch); 
-                
-                newSr.premiumSkuGoal = parseNumeric(sr.premiumSkuGoal);
-                newSr.premiumSkuAch = parseNumeric(sr.premiumSkuAch); 
+            // Strategy 2: AllOrigins (Backup)
+            try {
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(timestampedUrl)}`;
+                const response = await fetch(proxyUrl);
+                if (response.ok) {
+                    const text = await response.text();
+                    if (text.trim().length > 0 && !text.trim().toLowerCase().startsWith('<!doctype')) {
+                        return parseCsv(text);
+                    }
+                }
+            } catch (e) { console.warn("AllOrigins failed", e); }
 
-                return newSr;
+            // Strategy 3: Direct (Last resort - will fail locally but might work if published + browser settings allow)
+            try {
+                const response = await fetch(timestampedUrl);
+                if (response.ok) {
+                    const text = await response.text();
+                    return parseCsv(text);
+                }
+            } catch (e) { console.error("Direct fetch failed", e); }
+
+            throw new Error("Unable to fetch data. If running locally, this is likely due to browser security (CORS).");
+        }
+
+        function parseCsv(csvText) {
+            return new Promise((resolve) => {
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: (results) => resolve(results.data)
+                });
             });
-            // ------------------------------------------
+        }
 
-            let processedTerritoryData = [];
-            let processedDbData = [];
-            
-            function preProcessData() {
-                const nationallySortedSrs = [...fullSrData].map(item => calculatePercentages(item)).sort((a, b) => b.sttAchPercent - a.sttAchPercent);
-                nationallySortedSrs.forEach((sr, index) => {
-                    sr.nationalRank = index + 1;
-                });
-                
-                const territoryMap = new Map();
-                fullSrData.forEach(sr => {
-                    const key = sr.territory;
-                    if (!territoryMap.has(key)) {
-                        territoryMap.set(key, {
-                            territory: sr.territory,
-                            tm: sr.tm,
-                            area: sr.area,
-                            sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
-                            sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
-                        });
-                    }
-                    const territory = territoryMap.get(key);
-                    territory.sttTgt += sr.sttTgt;
-                    territory.sttAch += sr.sttAch;
-                    territory.ercTgt += sr.ercTgt;
-                    territory.ercAch += sr.ercAch;
-                    territory.sfTbrTgt += sr.sfTbrTgt;
-                    territory.sfTbrAch += sr.sfTbrAch;
-                    territory.premiumSkuGoal += sr.premiumSkuGoal;
-                    territory.premiumSkuAch += sr.premiumSkuAch;
-                });
-                
-                const dbMap = new Map();
-                fullSrData.forEach(sr => {
-                    const key = sr.dhName;
-                    if (!dbMap.has(key)) {
-                        dbMap.set(key, {
-                            dhName: sr.dhName,
-                            area: sr.area,
-                            territory: sr.territory,
-                            sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
-                            sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
-                        });
-                    }
-                    const db = dbMap.get(key);
-                    db.sttTgt += sr.sttTgt;
-                    db.sttAch += sr.sttAch;
-                    db.ercTgt += sr.ercTgt;
-                    db.ercAch += sr.ercAch;
-                    db.sfTbrTgt += sr.sfTbrTgt;
-                    db.sfTbrAch += sr.sfTbrAch;
-                    db.premiumSkuGoal += sr.premiumSkuGoal;
-                    db.premiumSkuAch += sr.premiumSkuAch;
-                });
+        async function initDashboard() {
+            try {
+                const [mtdData, chartData] = await Promise.all([
+                    fetchCsvData(MTD_DATA_URL),
+                    fetchCsvData(CHART_DATA_URL)
+                ]);
 
-                processedTerritoryData = Array.from(territoryMap.values());
-                processedDbData = Array.from(dbMap.values());
-                
-                processedTerritoryData.forEach(item => calculatePercentages(item));
-                processedDbData.forEach(item => calculatePercentages(item));
-            }
-
-            function getAggregatedDailyData() {
-                const aggMap = new Map();
-                
-                // Filter daily data based on selected dropdowns
-                const filteredDailyData = dailyRawData.filter(row => {
-                    const matchArea = selectedFilters.Area === 'All Areas' || row.AREA === selectedFilters.Area;
-                    const matchTerritory = selectedFilters.Territory === 'All Territories' || row.TERRITORY === selectedFilters.Territory;
-                    const matchDb = selectedFilters['DB Name'] === 'All DBs' || row.DISTRIBUTOR_NAME === selectedFilters['DB Name'];
-                    return matchArea && matchTerritory && matchDb;
-                });
-
-                filteredDailyData.forEach(row => {
-                    const dateObj = new Date(row.calday);
-                    const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }); 
-                    const rawDate = row.calday;
-
-                    if (!aggMap.has(rawDate)) {
-                        aggMap.set(rawDate, { date: rawDate, label: dateKey, sales: 0, erc: 0 });
-                    }
-                    const entry = aggMap.get(rawDate);
-                    entry.sales += row.sales;
-                    entry.erc += row.erc;
-                });
-
-                const sortedData = Array.from(aggMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                // Return array of objects with Date object for filtering
-                return sortedData.map(d => ({
-                    dateObj: new Date(d.date),
-                    label: d.label,
-                    sales: d.sales / LAC_DIVISOR, 
-                    erc: d.erc
+                // Process SR Data (MTD)
+                rawSrData = mtdData.map(sr => ({
+                    area: sr['AREA'] || sr['Area'],
+                    territory: sr['TERRITORY'] || sr['Territory'],
+                    tm: sr['TM'],
+                    lead: sr['LEAD'],
+                    dhCode: sr['DH CODE'] || sr['DH Code'], 
+                    dhName: sr['DH NAME'] || sr['DH Name'],
+                    dffCode: sr['DFF CODE'] || sr['DFF Code'],
+                    dffName: sr['DFF NAME'] || sr['DFF Name'],
+                    sttTgt: parseNumeric(sr['STT TGT']),
+                    sttAch: parseNumeric(sr['MTD ACH']),
+                    ercTgt: parseNumeric(sr['ERC TGT']),
+                    ercAch: parseNumeric(sr['ERC ACH']),
+                    sfTbrTgt: parseNumeric(sr['SF TBR (MAX LIMIT)']),
+                    sfTbrAch: parseNumeric(sr['SF TBR ERC ACH']), 
+                    premiumSkuGoal: parseNumeric(sr['PREMIUM SKU ERC GOAL']),
+                    premiumSkuAch: parseNumeric(sr['PREMIUM SKU ERC ACH'])
                 }));
+
+                // Process Daily Data
+                dailyRawData = chartData.map(row => ({
+                    calday: row['CALDAY'],
+                    sales: parseNumeric(row['SALES']),
+                    erc: parseNumeric(row['ERC']),
+                    AREA: row['AREA'],
+                    TERRITORY: row['TERRITORY'],
+                    DISTRIBUTOR_NAME: row['DISTRIBUTOR_NAME']
+                }));
+
+                const lastDate = dailyRawData[dailyRawData.length - 1]?.calday || 'Unknown';
+                document.getElementById('data-date').innerText = `(Data as of ${lastDate})`;
+                document.querySelectorAll('.benchmark-text').forEach(el => el.textContent = `${timeElapsedPercent}%`);
+
+                preProcessData();
+                initializeFilters();
+                applyFilters(); 
+                
+                document.getElementById('loading-overlay').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                document.querySelector('#loading-overlay h2').innerText = "Connection Failed";
+                document.querySelector('#loading-overlay p').innerText = "Failed to load data. This often happens when opening an HTML file directly from the desktop due to browser security (CORS). Try using a local server extension (like Live Server in VS Code).";
+                document.getElementById('error-details').innerText = error.message;
+                document.getElementById('error-details').classList.remove('hidden');
             }
+        }
+
+        function preProcessData() {
+            const nationallySortedSrs = [...rawSrData].map(item => calculatePercentages(item)).sort((a, b) => b.sttAchPercent - a.sttAchPercent);
+            nationallySortedSrs.forEach((sr, index) => { sr.nationalRank = index + 1; });
             
-            function filterTrendData(data, filterType) {
-                if (filterType === 'L3D') {
-                    return data.slice(-3);
-                }
-                if (filterType === 'W1') {
-                    return data.filter(d => d.dateObj.getDate() >= 1 && d.dateObj.getDate() <= 7);
-                }
-                if (filterType === 'W2') {
-                    return data.filter(d => d.dateObj.getDate() >= 8 && d.dateObj.getDate() <= 14);
-                }
-                if (filterType === 'W3') {
-                    return data.filter(d => d.dateObj.getDate() >= 15 && d.dateObj.getDate() <= 21);
-                }
-                if (filterType === 'W4') {
-                    return data.filter(d => d.dateObj.getDate() >= 22);
-                }
-                // Default to MTD (all data)
-                return data;
-            }
-
-            function populateDateWiseChart(ratio = 1, filterType = 'MTD', totalTarget = 0) {
-                const ctx = document.getElementById('comboChart');
-                if (!ctx) return; 
-
-                let chartDataRaw = getAggregatedDailyData();
-                
-                // Apply Time Range Filter
-                chartDataRaw = filterTrendData(chartDataRaw, filterType);
-
-                // Extract arrays for Chart.js
-                const labels = chartDataRaw.map(d => {
-                    const dayName = d.dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                    return `${d.label} (${dayName})`;
-                });
-
-                // Determine colors based on day of week (Friday = 5)
-                const barBackgroundColors = chartDataRaw.map(d => {
-                    return d.dateObj.getDay() === 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(17, 153, 142, 0.7)'; // Red for Friday
-                });
-                
-                const barBorderColors = chartDataRaw.map(d => {
-                    return d.dateObj.getDay() === 5 ? 'rgba(220, 38, 38, 1)' : 'rgba(17, 153, 142, 1)';
-                });
-
-                // Calculate Daily RR (Target / 26 Working Days) converted to Lac
-                const dailyRrValue = (totalTarget / 26) / LAC_DIVISOR;
-                const rrData = new Array(labels.length).fill(dailyRrValue);
-
-                const scaledSales = chartDataRaw.map(d => d.sales); // No ratio needed now as we filter raw data
-                const scaledErc = chartDataRaw.map(d => d.erc);
-
-                if (comboChartInstance) {
-                    comboChartInstance.destroy();
-                }
-
-                comboChartInstance = new Chart(ctx, {
-                    type: 'bar', 
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'ERC Ach', 
-                                data: scaledErc,
-                                type: 'line',
-                                borderColor: '#6a0dad', 
-                                backgroundColor: '#6a0dad',
-                                borderWidth: 3,
-                                tension: 0.4,
-                                yAxisID: 'y1',
-                                order: 1,
-                                datalabels: {
-                                    align: 'top',
-                                    anchor: 'start',
-                                    color: '#6a0dad',
-                                    font: {
-                                        weight: 'bold',
-                                        size: 11
-                                    },
-                                    offset: 4
-                                }
-                            },
-                            {
-                                label: `Daily RR: ${dailyRrValue.toFixed(2)}`, // Updated Label to show number
-                                data: rrData,
-                                type: 'line',
-                                borderColor: '#ef4444', // Red Color
-                                borderDash: [5, 5],
-                                borderWidth: 2,
-                                pointRadius: 0, // No dots
-                                fill: false,
-                                yAxisID: 'y',
-                                order: 0,
-                                datalabels: { display: false }
-                            },
-                            {
-                                label: 'Sales (Lac)', 
-                                data: scaledSales,
-                                type: 'bar',
-                                backgroundColor: barBackgroundColors, 
-                                borderColor: barBorderColors,
-                                borderWidth: 1,
-                                borderRadius: 4,
-                                yAxisID: 'y',
-                                order: 2,
-                                datalabels: {
-                                    align: 'end',
-                                    anchor: 'end',
-                                    color: '#0d7a71', 
-                                    font: {
-                                        weight: 'bold',
-                                        size: 10
-                                    },
-                                    formatter: function(value) {
-                                        return value.toFixed(2);
-                                    }
-                                }
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        layout: {
-                            padding: {
-                                top: 25
-                            }
-                        },
-                        plugins: {
-                            tooltip: { 
-                                mode: 'index', 
-                                intersect: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.dataset.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed.y !== null) {
-                                            label += context.parsed.y.toFixed(2);
-                                        }
-                                        return label;
-                                    }
-                                }
-                            },
-                            legend: { position: 'bottom' },
-                            datalabels: {
-                                display: true,
-                                clip: false
-                            }
-                        },
-                        scales: {
-                            x: { 
-                                display: true, 
-                                title: { display: true, text: 'Date' },
-                                ticks: { maxRotation: 45, minRotation: 45 }
-                            },
-                            y: { 
-                                type: 'linear', display: true, position: 'left', 
-                                title: { display: true, text: 'Sales (Lac)' },
-                                grid: { drawOnChartArea: true },
-                                grace: '10%' 
-                            },
-                            y1: { 
-                                type: 'linear', display: true, position: 'right', 
-                                title: { display: true, text: 'ERC Ach (Count)' },
-                                grid: { drawOnChartArea: false },
-                                grace: '10%' 
-                            }
-                        }
-                    }
-                });
-            }
-
-            function applyFilters() {
-                let filteredTerritories = [...processedTerritoryData];
-                let filteredDbs = [...processedDbData];
-                let filteredSrs = [...fullSrData];
-
-                if (selectedFilters.Area !== 'All Areas') {
-                    filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
-                }
-                if (selectedFilters.Territory !== 'All Territories') {
-                    filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
-                }
-                if (selectedFilters['DB Name'] !== 'All DBs') {
-                    filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
-                }
-                
-                const activeTerritories = new Set(filteredSrs.map(sr => sr.territory));
-                const activeDbNames = new Set(filteredSrs.map(sr => sr.dhName));
-                
-                filteredTerritories = processedTerritoryData.filter(t => activeTerritories.has(t.territory));
-                filteredDbs = processedDbData.filter(db => activeDbNames.has(db.dhName));
-
-                let dataForKpiTotals = filteredSrs; 
-                
-                const totals = calculateGrandTotals(dataForKpiTotals);
-                const newKpiData = updateKpiData(totals);
-
-                populateKpiCards(newKpiData);
-                populateTable('territory-list', filteredTerritories, 'territory', 'tm');
-                populateTable('db-list', filteredDbs, 'dhName', 'territory');
-                populateTable('sr-list', filteredSrs, 'dffName', 'dhName', true); 
-                
-                populateTerritoryChart(filteredTerritories);
-                populateDbChart(filteredDbs);
-                populateTopBottomSrCharts(filteredSrs);
-                
-                updateSrStatus(filteredSrs); 
-                updateDbStatus(filteredDbs); 
-
-                // Pass the STT Target to the chart for RR calculation
-                populateDateWiseChart(1, activeTrendFilter, totals.sttTgt);
-            }
-
-            function initializeTrendButtons() {
-                const buttons = document.querySelectorAll('.trend-btn');
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        // Remove active class from all
-                        buttons.forEach(b => b.classList.remove('active'));
-                        // Add active to clicked
-                        btn.classList.add('active');
-                        // Set current filter state
-                        activeTrendFilter = btn.getAttribute('data-filter');
-                        
-                        // Recalculate totals to get current target for RR
-                        let filteredSrs = [...fullSrData];
-                        if (selectedFilters.Area !== 'All Areas') filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
-                        if (selectedFilters.Territory !== 'All Territories') filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
-                        if (selectedFilters['DB Name'] !== 'All DBs') filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
-                        const totals = calculateGrandTotals(filteredSrs);
-
-                        // Update chart 
-                        populateDateWiseChart(1, activeTrendFilter, totals.sttTgt);
+            const territoryMap = new Map();
+            rawSrData.forEach(sr => {
+                const key = sr.territory;
+                if (!territoryMap.has(key)) {
+                    territoryMap.set(key, {
+                        territory: sr.territory, tm: sr.tm, area: sr.area,
+                        sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
+                        sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
                     });
-                });
-            }
-
-            function initializeFilters() {
-                const filterControls = document.getElementById('filter-controls');
-                filterControls.innerHTML = '';
-                
-                const areas = [...new Set(fullSrData.map(item => item.area))];
-                const territories = [...new Set(fullSrData.map(item => item.territory))];
-                const dbNames = [...new Set(fullSrData.map(item => item.dhName))];
-                
-                const dynamicFilterOptions = {
-                    'Area': ['All Areas', ...areas.sort()],
-                    'Territory': ['All Territories', ...territories.sort()],
-                    'DB Name': ['All DBs', ...dbNames.sort()]
-                };
-
-                const areaDropdown = createFilterDropdown('Area', dynamicFilterOptions['Area']);
-                areaSelect = areaDropdown.select;
-                
-                const territoryDropdown = createFilterDropdown('Territory', dynamicFilterOptions['Territory']);
-                territorySelect = territoryDropdown.select;
-
-                const dbNameDropdown = createFilterDropdown('DB Name', dynamicFilterOptions['DB Name']);
-                dbNameSelect = dbNameDropdown.select;
-
-                filterControls.appendChild(areaDropdown.wrapper);
-                filterControls.appendChild(territoryDropdown.wrapper);
-                filterControls.appendChild(dbNameDropdown.wrapper);
-            }
+                }
+                const t = territoryMap.get(key);
+                t.sttTgt += sr.sttTgt; t.sttAch += sr.sttAch;
+                t.ercTgt += sr.ercTgt; t.ercAch += sr.ercAch;
+                t.sfTbrTgt += sr.sfTbrTgt; t.sfTbrAch += sr.sfTbrAch;
+                t.premiumSkuGoal += sr.premiumSkuGoal; t.premiumSkuAch += sr.premiumSkuAch;
+            });
             
-            function updateDependentFilters(changedFilterName) {
-                let availableSrs = [...fullSrData];
-
-                if (selectedFilters.Area !== 'All Areas') {
-                    availableSrs = availableSrs.filter(sr => sr.area === selectedFilters.Area);
+            const dbMap = new Map();
+            rawSrData.forEach(sr => {
+                const key = sr.dhName;
+                if (!dbMap.has(key)) {
+                    dbMap.set(key, {
+                        dhName: sr.dhName, area: sr.area, territory: sr.territory,
+                        sttTgt: 0, sttAch: 0, ercTgt: 0, ercAch: 0,
+                        sfTbrTgt: 0, sfTbrAch: 0, premiumSkuGoal: 0, premiumSkuAch: 0
+                    });
                 }
+                const db = dbMap.get(key);
+                db.sttTgt += sr.sttTgt; db.sttAch += sr.sttAch;
+                db.ercTgt += sr.ercTgt; db.ercAch += sr.ercAch;
+                db.sfTbrTgt += sr.sfTbrTgt; db.sfTbrAch += sr.sfTbrAch;
+                db.premiumSkuGoal += sr.premiumSkuGoal; db.premiumSkuAch += sr.premiumSkuAch;
+            });
 
-                const availableTerritories = ['All Territories', ...new Set(availableSrs.map(item => item.territory).sort())];
-                
-                if (changedFilterName === 'Area') {
-                    populateSelectWithOptions(territorySelect, availableTerritories, 'Territory');
-                    selectedFilters.Territory = territorySelect.value; 
-                }
+            processedTerritoryData = Array.from(territoryMap.values()).map(item => calculatePercentages(item));
+            processedDbData = Array.from(dbMap.values()).map(item => calculatePercentages(item));
+        }
 
-                let availableSrsForDb = [...availableSrs]; 
-                if (selectedFilters.Territory !== 'All Territories') {
-                    availableSrsForDb = availableSrsForDb.filter(sr => sr.territory === selectedFilters.Territory);
-                }
+        function getAggregatedDailyData() {
+            const aggMap = new Map();
+            const filteredDailyData = dailyRawData.filter(row => {
+                const matchArea = selectedFilters.Area === 'All Areas' || row.AREA === selectedFilters.Area;
+                const matchTerritory = selectedFilters.Territory === 'All Territories' || row.TERRITORY === selectedFilters.Territory;
+                const matchDb = selectedFilters['DB Name'] === 'All DBs' || row.DISTRIBUTOR_NAME === selectedFilters['DB Name'];
+                return matchArea && matchTerritory && matchDb;
+            });
 
-                const availableDbNames = ['All DBs', ...new Set(availableSrsForDb.map(item => item.dhName).sort())];
+            filteredDailyData.forEach(row => {
+                const dateObj = new Date(row.calday);
+                const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }); 
+                const rawDate = row.calday;
+                if (!aggMap.has(rawDate)) aggMap.set(rawDate, { date: rawDate, label: dateKey, sales: 0, erc: 0 });
+                const entry = aggMap.get(rawDate);
+                entry.sales += row.sales;
+                entry.erc += row.erc;
+            });
 
-                if (changedFilterName === 'Area' || changedFilterName === 'Territory') {
-                    populateSelectWithOptions(dbNameSelect, availableDbNames, 'DB Name');
-                    selectedFilters['DB Name'] = dbNameSelect.value; 
-                }
-            }
+            return Array.from(aggMap.values())
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .map(d => ({ dateObj: new Date(d.date), label: d.label, sales: d.sales / LAC_DIVISOR, erc: d.erc }));
+        }
 
-            function createFilterDropdown(filterName, options) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'flex flex-col text-sm';
+        function filterTrendData(data, filterType) {
+            if (filterType === 'L3D') return data.slice(-3);
+            if (filterType === 'W1') return data.filter(d => d.dateObj.getDate() >= 1 && d.dateObj.getDate() <= 7);
+            if (filterType === 'W2') return data.filter(d => d.dateObj.getDate() >= 8 && d.dateObj.getDate() <= 14);
+            if (filterType === 'W3') return data.filter(d => d.dateObj.getDate() >= 15 && d.dateObj.getDate() <= 21);
+            if (filterType === 'W4') return data.filter(d => d.dateObj.getDate() >= 22);
+            return data;
+        }
 
-                const label = document.createElement('label');
-                label.textContent = filterName;
-                const filterId = `filter-${filterName.replace(/\s/g, '')}`;
-                label.htmlFor = filterId;
-                label.className = 'text-xs font-semibold text-gray-200 mb-1 pl-1'; 
-                
-                const select = document.createElement('select');
-                select.id = filterId;
-                select.className = 'py-2 px-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white cursor-pointer transition-all duration-150';
-                
-                populateSelectWithOptions(select, options, filterName);
+        function populateDateWiseChart(ratio = 1, filterType = 'MTD', totalTarget = 0) {
+            const ctx = document.getElementById('comboChart');
+            if (!ctx) return; 
+            let chartDataRaw = getAggregatedDailyData();
+            chartDataRaw = filterTrendData(chartDataRaw, filterType);
 
-                select.addEventListener('change', (event) => {
-                    const selectedValue = event.target.value;
-                    selectedFilters[filterName] = selectedValue;
-                    updateDependentFilters(filterName);
-                    applyFilters(); 
-                });
-                
-                wrapper.appendChild(label);
-                wrapper.appendChild(select);
-
-                return { wrapper, select };
-            }
-
-            function populateSelectWithOptions(selectElement, optionsArray, currentFilterKey) {
-                const currentSelectedValue = selectedFilters[currentFilterKey];
-                selectElement.innerHTML = ''; 
-
-                optionsArray.forEach(optionText => {
-                    const option = document.createElement('option');
-                    option.value = optionText;
-                    option.textContent = optionText;
-                    selectElement.appendChild(option);
-                });
-
-                if (optionsArray.includes(currentSelectedValue)) {
-                    selectElement.value = currentSelectedValue;
-                } else {
-                    selectElement.value = optionsArray[0]; 
-                    selectedFilters[currentFilterKey] = selectElement.value;
-                }
-            }
+            const labels = chartDataRaw.map(d => `${d.label} (${d.dateObj.toLocaleDateString('en-US', { weekday: 'short' })})`);
+            const barBackgroundColors = chartDataRaw.map(d => d.dateObj.getDay() === 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(17, 153, 142, 0.7)');
+            const barBorderColors = chartDataRaw.map(d => d.dateObj.getDay() === 5 ? 'rgba(220, 38, 38, 1)' : 'rgba(17, 153, 142, 1)');
             
-            function initializeTabs() {
-                const tabTerritory = document.getElementById('tab-territory');
-                const tabDb = document.getElementById('tab-db');
-                const tabSr = document.getElementById('tab-sr');
-                
-                const panelTerritory = document.getElementById('panel-territory');
-                const panelDb = document.getElementById('panel-db');
-                const panelSr = document.getElementById('panel-sr');
-                
-                const visualsMain = document.getElementById('visuals-panel-main');
-                const visualsSr = document.getElementById('visuals-panel-sr');
-                
-                const chartTerritory = document.getElementById('territory-chart-container');
-                const chartDb = document.getElementById('db-chart-container');
-                
-                tabTerritory.addEventListener('click', () => {
-                    activeTab = 'territory';
-                    tabTerritory.classList.add('tab-active');
-                    tabTerritory.classList.remove('tab-inactive');
-                    tabDb.classList.add('tab-inactive');
-                    tabDb.classList.remove('tab-active');
-                    tabSr.classList.add('tab-inactive');
-                    tabSr.classList.remove('tab-active');
-                    panelTerritory.style.display = 'block';
-                    panelDb.style.display = 'none';
-                    panelSr.style.display = 'none';
-                    visualsMain.style.display = 'grid';
-                    visualsSr.style.display = 'none';
-                    chartTerritory.style.display = 'block';
-                    chartDb.style.display = 'none';
+            const dailyRrValue = (totalTarget / 26) / LAC_DIVISOR;
+            const rrData = new Array(labels.length).fill(dailyRrValue);
+
+            if (comboChartInstance) comboChartInstance.destroy();
+
+            comboChartInstance = new Chart(ctx, {
+                type: 'bar', 
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'ERC Ach', data: chartDataRaw.map(d => d.erc), type: 'line', borderColor: '#6a0dad', backgroundColor: '#6a0dad', borderWidth: 3, tension: 0.4, yAxisID: 'y1', order: 1, datalabels: { align: 'top', anchor: 'start', color: '#6a0dad', font: { weight: 'bold', size: 11 }, offset: 4 }},
+                        { label: `Daily RR: ${dailyRrValue.toFixed(2)}`, data: rrData, type: 'line', borderColor: '#ef4444', borderDash: [5, 5], borderWidth: 2, pointRadius: 0, fill: false, yAxisID: 'y', order: 0, datalabels: { display: false }},
+                        { label: 'Sales (Lac)', data: chartDataRaw.map(d => d.sales), type: 'bar', backgroundColor: barBackgroundColors, borderColor: barBorderColors, borderWidth: 1, borderRadius: 4, yAxisID: 'y', order: 2, datalabels: { align: 'end', anchor: 'end', color: '#0d7a71', font: { weight: 'bold', size: 10 }, formatter: v => v.toFixed(2) }}
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 25 }},
+                    plugins: { tooltip: { mode: 'index', intersect: false }, legend: { position: 'bottom' }, datalabels: { display: true, clip: false }},
+                    scales: { x: { display: true }, y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Sales (Lac)' } }, y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'ERC Ach (Count)' }, grid: { drawOnChartArea: false } } }
+                }
+            });
+        }
+
+        // --- FILTER & UI LOGIC ---
+        function applyFilters() {
+            let filteredTerritories = [...processedTerritoryData];
+            let filteredDbs = [...processedDbData];
+            let filteredSrs = [...rawSrData];
+
+            if (selectedFilters.Area !== 'All Areas') filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
+            if (selectedFilters.Territory !== 'All Territories') filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
+            if (selectedFilters['DB Name'] !== 'All DBs') filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
+            
+            const activeTerritories = new Set(filteredSrs.map(sr => sr.territory));
+            const activeDbNames = new Set(filteredSrs.map(sr => sr.dhName));
+            
+            filteredTerritories = processedTerritoryData.filter(t => activeTerritories.has(t.territory));
+            filteredDbs = processedDbData.filter(db => activeDbNames.has(db.dhName));
+
+            const totals = calculateGrandTotals(filteredSrs);
+            const newKpiData = updateKpiData(totals);
+
+            populateKpiCards(newKpiData);
+            populateTable('territory-list', filteredTerritories, 'territory', 'tm');
+            populateTable('db-list', filteredDbs, 'dhName', 'territory');
+            populateTable('sr-list', filteredSrs, 'dffName', 'dhName', true); 
+            
+            populateTerritoryChart(filteredTerritories);
+            populateDbChart(filteredDbs);
+            populateTopBottomSrCharts(filteredSrs);
+            updateSrStatus(filteredSrs); 
+            updateDbStatus(filteredDbs); 
+            
+            populateDateWiseChart(1, activeTrendFilter, totals.sttTgt);
+        }
+
+        function initializeTrendButtons() {
+            document.querySelectorAll('.trend-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    activeTrendFilter = btn.getAttribute('data-filter');
+                    
+                    let filteredSrs = [...rawSrData];
+                    if (selectedFilters.Area !== 'All Areas') filteredSrs = filteredSrs.filter(d => d.area === selectedFilters.Area);
+                    if (selectedFilters.Territory !== 'All Territories') filteredSrs = filteredSrs.filter(d => d.territory === selectedFilters.Territory);
+                    if (selectedFilters['DB Name'] !== 'All DBs') filteredSrs = filteredSrs.filter(d => d.dhName === selectedFilters['DB Name']);
+                    
+                    populateDateWiseChart(1, activeTrendFilter, calculateGrandTotals(filteredSrs).sttTgt);
+                });
+            });
+        }
+
+        function initializeFilters() {
+            const controls = document.getElementById('filter-controls');
+            controls.innerHTML = '';
+            
+            const areas = [...new Set(rawSrData.map(i => i.area))].sort();
+            const territories = [...new Set(rawSrData.map(i => i.territory))].sort();
+            const dbNames = [...new Set(rawSrData.map(i => i.dhName))].sort();
+            
+            const areaDrop = createFilterDropdown('Area', ['All Areas', ...areas]);
+            areaSelect = areaDrop.select;
+            const terrDrop = createFilterDropdown('Territory', ['All Territories', ...territories]);
+            territorySelect = terrDrop.select;
+            const dbDrop = createFilterDropdown('DB Name', ['All DBs', ...dbNames]);
+            dbNameSelect = dbDrop.select;
+
+            controls.append(areaDrop.wrapper, terrDrop.wrapper, dbDrop.wrapper);
+        }
+
+        function createFilterDropdown(name, options) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex flex-col text-sm';
+            const label = document.createElement('label');
+            label.textContent = name;
+            label.className = 'text-xs font-semibold text-gray-200 mb-1 pl-1';
+            const select = document.createElement('select');
+            select.className = 'py-2 px-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white cursor-pointer';
+            
+            options.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt;
+                el.textContent = opt;
+                select.appendChild(el);
+            });
+
+            select.addEventListener('change', (e) => {
+                selectedFilters[name] = e.target.value;
+                updateDependentFilters(name);
+                applyFilters();
+            });
+
+            wrapper.append(label, select);
+            return { wrapper, select };
+        }
+
+        function updateDependentFilters(changed) {
+            let srs = [...rawSrData];
+            if (selectedFilters.Area !== 'All Areas') srs = srs.filter(s => s.area === selectedFilters.Area);
+            
+            if (changed === 'Area') {
+                const terrs = ['All Territories', ...new Set(srs.map(s => s.territory).sort())];
+                updateSelectOptions(territorySelect, terrs, 'Territory');
+            }
+
+            if (selectedFilters.Territory !== 'All Territories') srs = srs.filter(s => s.territory === selectedFilters.Territory);
+            
+            if (changed === 'Area' || changed === 'Territory') {
+                const dbs = ['All DBs', ...new Set(srs.map(s => s.dhName).sort())];
+                updateSelectOptions(dbNameSelect, dbs, 'DB Name');
+            }
+        }
+
+        function updateSelectOptions(select, options, key) {
+            const current = selectedFilters[key];
+            select.innerHTML = '';
+            options.forEach(opt => {
+                const el = document.createElement('option');
+                el.value = opt; el.textContent = opt;
+                select.appendChild(el);
+            });
+            select.value = options.includes(current) ? current : options[0];
+            selectedFilters[key] = select.value;
+        }
+
+        function initializeTabs() {
+            const tabs = {
+                'tab-territory': { panel: 'panel-territory', chart: 'territory-chart-container', srPanel: 'visuals-panel-main', dbChart: 'db-chart-container', srVis: 'visuals-panel-sr' },
+                'tab-db': { panel: 'panel-db', chart: 'db-chart-container', srPanel: 'visuals-panel-main', hideChart: 'territory-chart-container', srVis: 'visuals-panel-sr' },
+                'tab-sr': { panel: 'panel-sr', srVis: 'visuals-panel-sr', hideMain: 'visuals-panel-main', hideT: 'panel-territory', hideD: 'panel-db' }
+            };
+
+            Object.keys(tabs).forEach(tabId => {
+                document.getElementById(tabId).addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(b => {
+                        b.classList.remove('tab-active'); b.classList.add('tab-inactive');
+                    });
+                    document.getElementById(tabId).classList.add('tab-active');
+                    document.getElementById(tabId).classList.remove('tab-inactive');
+
+                    // Reset Visibility
+                    ['panel-territory', 'panel-db', 'panel-sr', 'territory-chart-container', 'db-chart-container', 'visuals-panel-main', 'visuals-panel-sr'].forEach(id => {
+                        document.getElementById(id).style.display = 'none';
+                    });
+
+                    // Set visibility based on logic
+                    if (tabId === 'tab-territory') {
+                        document.getElementById('panel-territory').style.display = 'block';
+                        document.getElementById('territory-chart-container').style.display = 'block';
+                        document.getElementById('visuals-panel-main').style.display = 'grid';
+                    } else if (tabId === 'tab-db') {
+                        document.getElementById('panel-db').style.display = 'block';
+                        document.getElementById('db-chart-container').style.display = 'block';
+                        document.getElementById('visuals-panel-main').style.display = 'grid';
+                    } else {
+                        document.getElementById('panel-sr').style.display = 'block';
+                        document.getElementById('visuals-panel-sr').style.display = 'grid';
+                    }
                     applyFilters();
                 });
+            });
+        }
+
+        function updateKpiData(totals) {
+            const newKpiData = {
+                timeElapsed: { label: "Time Elapsed", percentage: timeElapsedPercent, valueText: daysPassed + " Working Days Passed", rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' }, isBenchmark: true },
+                mtdStt: { label: "MTD STT Ach", percentage: totals.sttAchPercent, unit: "Lac", target: totals.sttTgt, achieved: totals.sttAch },
+                mtdErc: { label: "MTD ERC Ach", percentage: totals.ercAchPercent, unit: "Stores", target: totals.ercTgt, achieved: totals.ercAch },
+                sfTbr: { label: "SF TBR Vol.", percentage: (totals.sfTbrTgt > 0 ? (totals.sfTbrAch/totals.sfTbrTgt)*100 : 0), unit: "TBRs", target: totals.sfTbrTgt, achieved: totals.sfTbrAch },
+                premiumTp: { label: "Premium TP Ach", percentage: totals.premiumSkuAchPercent, unit: "Stores", target: totals.premiumSkuGoal, achieved: totals.premiumSkuAch }
+            };
+            // RAG
+            ['mtdStt', 'mtdErc', 'sfTbr', 'premiumTp'].forEach(k => newKpiData[k].rag = getRAGStatus(newKpiData[k].percentage));
+            return newKpiData;
+        }
+
+        function createKpiCard(kpi) {
+            const rag = kpi.rag;
+            let mainValue = kpi.isBenchmark ? kpi.percentage.toFixed(2) + '%' : (kpi.label.includes('SF TBR') ? formatCount(kpi.achieved) : kpi.percentage.toFixed(2) + '%');
+            let subContent = kpi.isBenchmark ? `<p class="text-sm text-gray-500 mt-2 font-medium">${kpi.valueText}</p>` : '';
+
+            if (!kpi.isBenchmark) {
+                const bal = kpi.target - kpi.achieved;
+                const diff = kpi.percentage - timeElapsedPercent;
+                const diffHtml = !kpi.label.includes('SF TBR') ? `<div class="flex justify-between items-center text-gray-600"><span class="text-xs font-medium">vs. Time Elapsed:</span><span class="font-bold text-sm ${diff < 0 ? 'text-red-600' : 'text-green-600'}">${diff > 0 ? '+' : ''}${diff.toFixed(2)}%</span></div>` : '';
                 
-                tabDb.addEventListener('click', () => {
-                    activeTab = 'db';
-                    tabTerritory.classList.remove('tab-active');
-                    tabTerritory.classList.add('tab-inactive');
-                    tabDb.classList.remove('tab-inactive');
-                    tabDb.classList.add('tab-active');
-                    tabSr.classList.add('tab-inactive');
-                    tabSr.classList.remove('tab-active');
-                    panelTerritory.style.display = 'none';
-                    panelDb.style.display = 'block';
-                    panelSr.style.display = 'none';
-                    visualsMain.style.display = 'grid';
-                    visualsSr.style.display = 'none';
-                    chartTerritory.style.display = 'none';
-                    chartDb.style.display = 'block';
-                    applyFilters();
-                });
-                
-                tabSr.addEventListener('click', () => {
-                    activeTab = 'sr';
-                    tabTerritory.classList.remove('tab-active');
-                    tabTerritory.classList.add('tab-inactive');
-                    tabDb.classList.remove('tab-active');
-                    tabDb.classList.add('tab-inactive');
-                    tabSr.classList.remove('tab-inactive');
-                    tabSr.classList.add('tab-active');
-                    panelTerritory.style.display = 'none';
-                    panelDb.style.display = 'none';
-                    panelSr.style.display = 'block';
-                    visualsMain.style.display = 'none';
-                    visualsSr.style.display = 'grid';
-                    applyFilters();
-                });
+                subContent = `
+                    <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm">
+                        ${diffHtml}
+                        <div class="space-y-1 pt-1 border-t border-gray-100">
+                             ${!kpi.label.includes('SF TBR') ? `<div class="flex justify-between text-gray-600"><span class="text-xs">TGT:</span><span class="font-bold text-gray-700">${formatValue(kpi.target, kpi.unit)}</span></div>` : ''}
+                             <div class="flex justify-between text-gray-600"><span class="text-xs">Ach:</span><span class="font-bold ${rag.textColor}">${formatValue(kpi.achieved, kpi.unit)}</span></div>
+                             ${!kpi.label.includes('SF TBR') ? `<div class="flex justify-between text-gray-600"><span class="text-xs">Bal:</span><span class="font-bold ${bal > 0 ? 'text-red-500' : 'text-gray-500'}">${formatValue(bal, kpi.unit)}</span></div>` : ''}
+                        </div>
+                    </div>`;
             }
 
-            function updateKpiData(totals) {
-                const kpiTotalSTT = totals.sttAchPercent;
-                const kpiTotalERC = totals.ercAchPercent;
-                const kpiTotalTBRTgt = totals.sfTbrTgt;
-                const kpiTotalTBRAch = totals.sfTbrAch; 
-                const kpiTotalPSKUACHPercent = totals.premiumSkuAchPercent;
-                
-                const newKpiData = {
-                    timeElapsed: {
-                        label: "Time Elapsed", 
-                        percentage: timeElapsedPercent,
-                        valueText: "9 out of 27 Working Days Passed", 
-                        rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' },
-                        isBenchmark: true
-                    },
-                    mtdStt: {
-                        label: "MTD STT Ach", 
-                        percentage: kpiTotalSTT, 
-                        unit: "Lac",
-                        target: totals.sttTgt, 
-                        achieved: totals.sttAch, 
-                        rag: null, 
-                        actualValue: kpiTotalSTT.toFixed(2) + "%"
-                    },
-                    mtdErc: {
-                        label: "MTD ERC Ach", 
-                        percentage: kpiTotalERC,
-                        unit: "Stores",
-                        target: totals.ercTgt, 
-                        achieved: totals.ercAch, 
-                        rag: null, 
-                        actualValue: kpiTotalERC.toFixed(2) + "%"
-                    },
-                    sfTbr: {
-                        label: "SF TBR Vol.", 
-                        percentage: (kpiTotalTBRTgt > 0) ? (kpiTotalTBRAch / kpiTotalTBRTgt) * 100 : 0, 
-                        unit: "TBRs",
-                        target: kpiTotalTBRTgt, 
-                        achieved: kpiTotalTBRAch, 
-                        rag: null,
-                        actualValue: formatCount(kpiTotalTBRAch) 
-                    },
-                    premiumTp: {
-                        label: "Premium TP Ach", 
-                        percentage: kpiTotalPSKUACHPercent,
-                        unit: "Stores",
-                        target: totals.premiumSkuGoal, 
-                        achieved: totals.premiumSkuAch, 
-                        rag: null, 
-                        actualValue: kpiTotalPSKUACHPercent.toFixed(2) + "%"
-                    }
-                };
-                newKpiData.mtdStt.rag = getRAGStatus(newKpiData.mtdStt.percentage);
-                newKpiData.mtdErc.rag = getRAGStatus(newKpiData.mtdErc.percentage);
-                newKpiData.sfTbr.rag = getRAGStatus(newKpiData.sfTbr.percentage);
-                newKpiData.premiumTp.rag = getRAGStatus(newKpiData.premiumTp.percentage);
-                
-                return newKpiData;
+            return `
+                <div class="bg-white p-6 rounded-xl shadow-xl border border-gray-100 ${kpi.isBenchmark ? 'col-span-2 md:col-span-1' : ''}">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-sm font-medium text-gray-500">${kpi.label}</p>
+                        <span class="w-3 h-3 rounded-full ${rag.color.replace('fill-', 'bg-')} ring-2 ring-offset-2 ${rag.ring}"></span>
+                    </div>
+                    <div class="text-3xl md:text-4xl font-extrabold mt-1 ${rag.textColor}">${mainValue}</div>
+                    <div class="gauge-meter mt-4 mb-3"><div class="gauge-fill ${rag.color}" style="width: ${Math.min(100, kpi.percentage).toFixed(2)}%"></div></div>
+                    ${subContent}
+                </div>`;
+        }
+
+        function populateKpiCards(kpiData) {
+            const container = document.getElementById('kpi-cards');
+            container.innerHTML = '';
+            ['timeElapsed', 'mtdStt', 'mtdErc', 'sfTbr', 'premiumTp'].forEach(key => {
+                if (kpiData[key]) container.insertAdjacentHTML('beforeend', createKpiCard(kpiData[key]));
+            });
+        }
+
+        function populateTable(id, data, nameKey, subKey, isSr = false) {
+            const tbody = document.getElementById(id);
+            const table = tbody.closest('table');
+            if (table.tFoot) table.tFoot.remove();
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" class="text-center py-4 text-gray-500">No data found.</td></tr>`;
+                return;
             }
 
-            function createKpiCard(kpi) {
-                const rag = kpi.rag || getRAGStatus(kpi.percentage);
+            data.sort((a, b) => b.sttAchPercent - a.sttAchPercent).forEach(row => {
+                const sttC = getRAGStatus(row.sttAchPercent).textColor;
+                const ercC = getRAGStatus(row.ercAchPercent).textColor;
+                const pskuC = getRAGStatus(row.premiumSkuAchPercent).textColor;
+                const sfC = getRAGStatus(row.sfTbrAchPercent).textColor;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 shadow-sm">${row[nameKey]}<div class="text-xs text-gray-500">${row[subKey] || ''}</div></td>
+                    <td class="px-3 py-3 text-center text-sm text-gray-500">${formatInLac(row.sttTgt)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-medium ${sttC}">${formatInLac(row.sttAch)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${sttC}">${row.sttAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm text-gray-500">${formatCount(row.ercTgt)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-medium ${ercC}">${formatCount(row.ercAch)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${ercC}">${row.ercAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm text-gray-500">${formatCount(row.sfTbrTgt)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-medium ${sfC}">${formatCount(row.sfTbrAch)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${sfC}">${row.sfTbrAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm text-gray-500">${formatCount(row.premiumSkuGoal)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-medium ${pskuC}">${formatCount(row.premiumSkuAch)}</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${pskuC}">${row.premiumSkuAchPercent.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Grand Total Footer
+            const t = calculateGrandTotals(data);
+            const foot = document.createElement('tfoot');
+            foot.className = 'bg-gray-100 font-bold border-t-2 border-gray-300';
+            foot.innerHTML = `<tr>
+                <td class="px-3 py-3 sticky left-0 bg-gray-100 z-10">GRAND TOTAL</td>
+                <td class="px-3 py-3 text-center text-gray-700">${formatInLac(t.sttTgt)}</td>
+                <td class="px-3 py-3 text-center text-gray-900">${formatInLac(t.sttAch)}</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.sttAchPercent).textColor}">${t.sttAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center text-gray-700">${formatCount(t.ercTgt)}</td>
+                <td class="px-3 py-3 text-center text-gray-900">${formatCount(t.ercAch)}</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.ercAchPercent).textColor}">${t.ercAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center text-gray-700">${formatCount(t.sfTbrTgt)}</td>
+                <td class="px-3 py-3 text-center text-gray-900">${formatCount(t.sfTbrAch)}</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.sfTbrAchPercent).textColor}">${t.sfTbrAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center text-gray-700">${formatCount(t.premiumSkuGoal)}</td>
+                <td class="px-3 py-3 text-center text-gray-900">${formatCount(t.premiumSkuAch)}</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.premiumSkuAchPercent).textColor}">${t.premiumSkuAchPercent.toFixed(2)}%</td>
+            </tr>`;
+            table.appendChild(foot);
+        }
+
+        // --- Chart Populators (Reusable for Territory, DB, Top/Bottom) ---
+        function createBarChart(containerId, dataArray, labelKey, subKey) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (dataArray.length === 0) { container.innerHTML = '<div class="text-center py-8 text-gray-500">No data</div>'; return; }
+
+            dataArray.sort((a,b) => b.sttAchPercent - a.sttAchPercent).forEach((d, i) => {
+                const rag = getRAGStatus(d.sttAchPercent);
+                const width = Math.min(100, d.sttAchPercent).toFixed(2);
+                const gap = d.sttAchPercent - timeElapsedPercent;
                 
-                let mainValue = kpi.actualValue;
-                let subContent = `<p class="text-sm text-gray-500 mt-2 font-medium">${kpi.valueText || ''}</p>`;
-                let mainValueClass = rag.textColor;
-                let comparisonText = ''; 
-
-                if (!kpi.isBenchmark) {
-                    const target = kpi.target;
-                    const achieved = kpi.achieved;
-                    const balance = target - achieved;
-                    const unit = kpi.unit;
-
-                    const fmtTarget = formatValue(target, unit);
-                    const fmtAchieved = formatValue(achieved, unit);
-                    const fmtBalance = formatValue(balance, unit);
-                    
-                    if (kpi.label.includes('MTD STT Ach') || kpi.label.includes('MTD ERC Ach') || kpi.label.includes('Premium TP Ach')) {
-                        const difference = kpi.percentage - timeElapsedPercent;
-                        let diffValue;
-                        let diffClass = difference < 0 ? 'text-red-600' : 'text-green-600';
-                        
-                        if (difference < 0) {
-                            diffValue = `-${Math.abs(difference).toFixed(2)}%`;
-                        } else {
-                            diffValue = `+${difference.toFixed(2)}%`;
-                        }
-
-                        comparisonText = `
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">vs. Time Elapsed (${timeElapsedPercent.toFixed(2)}%):</span>
-                                <span class="font-bold text-sm ${diffClass}">${diffValue}</span>
-                            </div>
-                        `;
-
-                        mainValue = kpi.percentage.toFixed(2) + '%'; 
-                        mainValueClass = rag.textColor; 
-                        
-                    } else if (kpi.label.includes('SF TBR Vol.')) { 
-                        mainValue = formatCount(achieved);
-                        mainValueClass = 'text-gray-800'; 
-                        rag.color = 'fill-gray-400';
-                        rag.ring = 'ring-gray-400';
-
-                    } else {
-                        mainValue = kpi.percentage.toFixed(2) + '%';
-                        mainValueClass = rag.textColor;
-                    }
-
-                    const displayUnit = unit === "Lac" ? "Lac" : "";
-
-                    let baseContent = ''; 
-
-                    if (kpi.label.includes('SF TBR Vol.')) {
-                        baseContent = `
-                            <!-- Achieved (Count) -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">Achieved:</span>
-                                <span class="font-bold text-sm text-gray-700">${fmtAchieved}</span>
-                            </div>
-                        `;
-                    } else {
-                        baseContent = `
-                            <!-- Target -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">TGT (${displayUnit}):</span>
-                                <span class="font-bold text-sm text-gray-700">${fmtTarget}</span>
-                            </div>
-                            <!-- Achieved -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">Achieved:</span>
-                                <span class="font-bold text-sm ${rag.textColor}">${fmtAchieved}</span>
-                            </div>
-                            <!-- Balance -->
-                            <div class="flex justify-between items-center text-gray-600">
-                                <span class="text-xs font-medium">Balance:</span>
-                                <span class="font-bold text-sm ${balance >= 0 ? 'text-gray-500' : 'text-red-500'}">${fmtBalance}</span>
-                            </div>
-                        `;
-                    }
-                    
-                    if (comparisonText) {
-                        subContent = `
-                            <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm">
-                                ${comparisonText}
-                                <div class="space-y-1 pt-1 border-t border-gray-100">
-                                    ${baseContent}
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        subContent = `
-                            <div class="mt-3 pt-3 border-t border-gray-100 space-y-1 text-sm">
-                                ${baseContent}
-                            </div>
-                        `;
-                    }
-                    
-                } else {
-                    mainValue = kpi.percentage.toFixed(2) + '%';
-                    mainValueClass = 'text-blue';
-                }
-                
-                const cardHtml = `
-                    <div class="bg-white p-6 rounded-xl shadow-xl transition hover:shadow-2xl border border-gray-100 ${kpi.isBenchmark ? 'col-span-2 md:col-span-1' : ''}">
-                        
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-sm font-medium text-gray-500">${kpi.label}</p>
-                            <span class="w-3 h-3 rounded-full ${rag.color.replace('fill-', 'bg-')} ring-2 ring-offset-2 ${rag.ring}"></span>
+                const item = document.createElement('div');
+                item.className = 'flex items-center text-sm';
+                item.innerHTML = `
+                    <div class="w-1/4 truncate mr-4">
+                        <div class="font-bold text-gray-900 truncate">#${i+1} ${d[labelKey]}</div>
+                        <div class="text-xs text-gray-500 truncate">${d[subKey] || ''}</div>
+                    </div>
+                    <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
+                        <div class="absolute h-full w-[2px] bg-blue-500 border-l border-dashed border-blue-700 z-10" style="left: ${timeElapsedPercent}%"></div>
+                        <div class="h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${rag.color}" style="width: ${width}%">
+                            ${d.sttAchPercent > 15 ? d.sttAchPercent.toFixed(1) + '%' : ''}
                         </div>
-
-                        <div class="text-3xl md:text-4xl font-extrabold mt-1 ${mainValueClass}">${mainValue}</div>
-                        
-                        <div class="gauge-meter mt-4 mb-3">
-                            <div class="gauge-fill ${rag.color}" style="width: ${Math.min(100, kpi.percentage).toFixed(2)}%"></div>
-                        </div>
-                        
-                        ${subContent}
+                        <span class="absolute right-2 text-xs font-bold ${gap >= 0 ? 'text-green-600' : 'text-red-600'}">GAP: ${gap > 0 ? '+' : ''}${gap.toFixed(2)}%</span>
+                         ${d.sttAchPercent <= 15 ? `<span class="absolute left-2 text-xs font-bold ${rag.textColor}">${d.sttAchPercent.toFixed(1)}%</span>` : ''}
                     </div>
                 `;
-                return cardHtml;
-            }
+                container.appendChild(item);
+            });
+        }
 
-            function populateKpiCards(kpiData) {
-                const container = document.getElementById('kpi-cards');
-                container.innerHTML = '';
-                const orderedKeys = ['timeElapsed', 'mtdStt', 'mtdErc', 'sfTbr', 'premiumTp'];
-                orderedKeys.forEach(key => {
-                    const kpi = kpiData[key];
-                    if (kpi) {
-                        container.insertAdjacentHTML('beforeend', createKpiCard(kpi));
-                    }
-                });
-            }
+        function populateTerritoryChart(data) { createBarChart('stt-chart', data, 'territory', 'tm'); }
+        function populateDbChart(data) { createBarChart('db-stt-chart', data, 'dhName', 'territory'); }
+        function populateTopBottomSrCharts(data) {
+            // Sort full data
+            const sorted = [...data].sort((a,b) => b.sttAchPercent - a.sttAchPercent);
+            createBarChart('top-10-sr-chart', sorted.slice(0, 10), 'dffName', 'dhName');
+            createBarChart('bottom-10-sr-chart', sorted.slice(-10).reverse(), 'dffName', 'dhName');
+        }
+
+        function updateSrStatus(data) {
+            const status = { green: 0, amber: 0, red: 0, total: data.length };
+            data.forEach(d => {
+                const s = getRAGStatus(d.sttAchPercent).text;
+                if(s==='Green') status.green++; else if(s==='Amber') status.amber++; else status.red++;
+            });
+            renderHealthBar('sr-health', 'DFF', status);
+        }
+
+        function updateDbStatus(data) {
+            const status = { green: 0, amber: 0, red: 0, total: data.length };
+            data.forEach(d => {
+                const s = getRAGStatus(d.sttAchPercent).text;
+                if(s==='Green') status.green++; else if(s==='Amber') status.amber++; else status.red++;
+            });
+            renderHealthBar('db-health', 'DB', status);
+        }
+
+        function renderHealthBar(id, label, s) {
+            const gp = s.total > 0 ? (s.green/s.total)*100 : 0;
+            const ap = s.total > 0 ? (s.amber/s.total)*100 : 0;
+            const rp = s.total > 0 ? (s.red/s.total)*100 : 0;
             
-            function populateTable(tableId, dataArray, keyForName, keyForSubtext, isSrTable = false) {
-                const tableBody = document.getElementById(tableId);
-                const table = tableBody.closest('table');
-                
-                let tfoot = table.querySelector('tfoot');
-                if (tfoot) tfoot.remove();
+            document.getElementById(id).innerHTML = `
+                <h3 class="text-md font-semibold text-gray-700 mb-2">${label} Status (Total: ${s.total})</h3>
+                <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
+                    <div class="chart-bar fill-green text-center text-white p-1" style="width: ${gp}%">${s.green || ''}</div>
+                    <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${ap}%">${s.amber || ''}</div>
+                    <div class="chart-bar fill-red text-center text-white p-1" style="width: ${rp}%">${s.red || ''}</div>
+                </div>
+                <div class="flex justify-between text-xs mt-1">
+                    <span class="text-green">Above 90%: ${s.green}</span>
+                    <span class="text-amber">85-90%: ${s.amber}</span>
+                    <span class="text-red">Below 85%: ${s.red}</span>
+                </div>
+            `;
+        }
 
-                tableBody.innerHTML = ''; 
+        // Initialize Everything
+        initDashboard();
+        initializeTabs();
+        initializeTrendButtons();
 
-                if (dataArray.length === 0) {
-                    const colspan = isSrTable ? "11" : "13";
-                    tableBody.innerHTML = `<tr><td colspan="${colspan}" class="text-center py-8 text-gray-500 font-semibold text-lg">No data found for the selected filters.</td></tr>`;
-                    return;
-                }
-
-                dataArray
-                    .sort((a, b) => b.sttAchPercent - a.sttAchPercent) 
-                    .forEach(data => {
-                    data = calculatePercentages(data);
-                            
-                    const sttRag = getRAGStatus(data.sttAchPercent);
-                    const ercRag = getRAGStatus(data.ercAchPercent);
-                    const tbrRag = getRAGStatus(data.sfTbrAchPercent);
-                    const pskuRag = getRAGStatus(data.premiumSkuAchPercent);
-
-                    const getAchClass = (percentage) => getRAGStatus(percentage).textColor;
-                    
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50 transition duration-150';
-                    
-                    if (isSrTable) {
-                        row.innerHTML = `
-                            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white shadow-sm z-10">
-                                ${data[keyForName]}
-                                <div class="text-xs text-gray-500">${data[keyForSubtext] || ''}</div>
-                            </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatInLac(data.sttTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${sttRag.textColor}">${formatInLac(data.sttAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.sttAchPercent)}">${data.sttAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.ercTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${ercRag.textColor}">${formatCount(data.ercAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.ercAchPercent)}">${data.ercAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium text-gray-900">${formatCount(data.sfTbrAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.premiumSkuGoal)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${pskuRag.textColor}">${formatCount(data.premiumSkuAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.premiumSkuAchPercent)}">${data.premiumSkuAchPercent.toFixed(2)}%</td>
-                        `;
-                    } else {
-                        row.innerHTML = `
-                            <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white shadow-sm z-10">
-                                ${data[keyForName]}
-                                <div class="text-xs text-gray-500">${data[keyForSubtext] || ''}</div>
-                            </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatInLac(data.sttTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${sttRag.textColor}">${formatInLac(data.sttAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.sttAchPercent)}">${data.sttAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.ercTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${ercRag.textColor}">${formatCount(data.ercAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.ercAchPercent)}">${data.ercAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.sfTbrTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${tbrRag.textColor}">${formatCount(data.sfTbrAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.sfTbrAchPercent)}">${data.sfTbrAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-500">${formatCount(data.premiumSkuGoal)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-medium ${pskuRag.textColor}">${formatCount(data.premiumSkuAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold ${getAchClass(data.premiumSkuAchPercent)}">${data.premiumSkuAchPercent.toFixed(2)}%</td>
-                        `;
-                    }
-                    tableBody.appendChild(row);
-                });
-                
-                const grandTotals = calculateGrandTotals(dataArray);
-                tfoot = document.createElement('tfoot');
-                tfoot.className = 'bg-gray-100 border-t-2 border-gray-300';
-                
-                const totalRow = document.createElement('tr');
-                
-                const getAchClassForTotal = (percentage) => getRAGStatus(percentage).textColor;
-                
-                if (isSrTable) {
-                    totalRow.innerHTML = `
-                        <td class="px-3 py-3 whitespace-nowrap text-sm font-extrabold text-gray-900 sticky left-0 bg-gray-100 shadow-sm z-10">
-                            GRAND TOTAL (${dataArray.length} items)
-                        </td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatInLac(grandTotals.sttTgt)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatInLac(grandTotals.sttAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sttAchPercent)}">${grandTotals.sttAchPercent.toFixed(2)}%</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.ercTgt)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.ercAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.ercAchPercent)}">${grandTotals.ercAchPercent.toFixed(2)}%</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.sfTbrAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center text-gray-700">${formatCount(grandTotals.premiumSkuGoal)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.premiumSkuAch)}</td>
-                        <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
-                    `;
-                } else {
-                        totalRow.innerHTML = `
-                            <td class="px-3 py-3 whitespace-nowrap text-sm font-extrabold text-gray-900 sticky left-0 bg-gray-100 shadow-sm z-10">
-                                GRAND TOTAL (${dataArray.length} items)
-                            </td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatInLac(grandTotals.sttTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatInLac(grandTotals.sttAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sttAchPercent)}">${grandTotals.sttAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.ercTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.ercAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.ercAchPercent)}">${grandTotals.ercAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.sfTbrTgt)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.sfTbrAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.sfTbrAchPercent)}">${grandTotals.sfTbrAchPercent.toFixed(2)}%</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-bold text-gray-700">${formatCount(grandTotals.premiumSkuGoal)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold text-gray-900">${formatCount(grandTotals.premiumSkuAch)}</td>
-                            <td class="px-3 py-3 whitespace-nowrap text-sm text-center font-extrabold ${getAchClassForTotal(grandTotals.premiumSkuAchPercent)}">${grandTotals.premiumSkuAchPercent.toFixed(2)}%</td>
-                        `;
-                }
-                
-                tfoot.appendChild(totalRow);
-                table.appendChild(tfoot);
-            }
-
-            function populateTerritoryChart(dataArray) {
-                const chartContainer = document.getElementById('stt-chart');
-                chartContainer.innerHTML = '';
-                
-                const timeElapsedText = document.querySelector('#territory-chart-container .text-sm');
-                if(timeElapsedText) timeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span> (Ranked by Achievement)`;
-
-
-                if (dataArray.length === 0) {
-                    chartContainer.innerHTML = `<div class="text-center py-8 text-gray-500 font-semibold">No chart data available for selection.</div>`;
-                    return;
-                }
-
-                dataArray
-                    .sort((a, b) => b.sttAchPercent - a.sttAchPercent)
-                    .forEach((data, index) => {
-                    const rank = index + 1; 
-                    data = calculatePercentages(data); 
-                    const achievement = data.sttAchPercent;
-                    const status = getRAGStatus(achievement);
-                    const barWidth = Math.min(100, achievement).toFixed(2); 
-
-                    const gapPercent = achievement - timeElapsedPercent;
-                    const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                    const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                    const chartItem = document.createElement('div');
-                    chartItem.className = 'flex items-center';
-                    chartItem.innerHTML = `
-                        <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                            <div class="font-bold text-gray-900 truncate">#${rank} ${data.territory}</div>
-                            <div class="text-xs text-gray-500 truncate">${data.tm}</div>
-                        </div>
-                        <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                            <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                            <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                            </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                GAP: ${formattedGap}
-                            </span>
-                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                        </div>
-                    `;
-                    chartContainer.appendChild(chartItem);
-                });
-            }
-
-            function populateDbChart(dataArray) {
-                const chartContainer = document.getElementById('db-stt-chart');
-                chartContainer.innerHTML = '';
-                
-                const timeElapsedText = document.querySelector('#db-chart-container .text-sm');
-                if(timeElapsedText) timeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span> (Ranked by Achievement)`;
-
-
-                if (dataArray.length === 0) {
-                    chartContainer.innerHTML = `<div class="text-center py-8 text-gray-500 font-semibold">No chart data available for selection.</div>`;
-                    return;
-                }
-
-                dataArray
-                    .sort((a, b) => b.sttAchPercent - a.sttAchPercent)
-                    .forEach((data, index) => {
-                    const rank = index + 1; 
-                    data = calculatePercentages(data); 
-                    const achievement = data.sttAchPercent;
-                    const status = getRAGStatus(achievement);
-                    const barWidth = Math.min(100, achievement).toFixed(2); 
-
-                    const gapPercent = achievement - timeElapsedPercent;
-                    const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                    const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                    const chartItem = document.createElement('div');
-                    chartItem.className = 'flex items-center';
-                    chartItem.innerHTML = `
-                        <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                            <div class="font-bold text-gray-900 truncate">#${rank} ${data.dhName}</div>
-                            <div class="text-xs text-gray-500 truncate">${data.territory}</div>
-                        </div>
-                        <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                            <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                            <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                            </div>
-                            <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                GAP: ${formattedGap}
-                            </span>
-                            ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                        </div>
-                    `;
-                    chartContainer.appendChild(chartItem);
-                });
-            }
-            
-            function populateTopBottomSrCharts(dataArray) {
-                const topContainer = document.getElementById('top-10-sr-chart');
-                const bottomContainer = document.getElementById('bottom-10-sr-chart');
-                const topContainerParent = topContainer.closest('.lg\\:col-span-1');
-                const bottomContainerParent = bottomContainer.closest('.lg\\:col-span-1');
-                const topTitle = topContainerParent.querySelector('h2');
-                const bottomTitle = bottomContainerParent.querySelector('h2');
-                
-                topContainer.innerHTML = '';
-                bottomContainer.innerHTML = '';
-
-                const topTimeElapsedText = topContainerParent.querySelector('.text-sm');
-                if(topTimeElapsedText) topTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
-                const bottomTimeElapsedText = bottomContainerParent.querySelector('.text-sm');
-                if(bottomTimeElapsedText) bottomTimeElapsedText.innerHTML = `Time Elapsed Target: <span class="text-blue">${timeElapsedPercent.toFixed(2)}%</span>`;
-
-
-                const isFiltered = selectedFilters.Area !== 'All Areas' || 
-                                   selectedFilters.Territory !== 'All Territories' || 
-                                   selectedFilters['DB Name'] !== 'All DBs';
-
-                if (dataArray.length === 0) {
-                    topContainer.innerHTML = `<div class="text-center py-8 text-gray-500 font-semibold">No data available for selection.</div>`;
-                    bottomContainerParent.style.display = 'none'; 
-                    return;
-                }
-                
-                dataArray.forEach(data => calculatePercentages(data));
-                
-                const sortedSrData = [...dataArray].sort((a, b) => b.sttAchPercent - a.sttAchPercent);
-
-                if (isFiltered) {
-                    bottomContainerParent.style.display = 'none';
-                    
-                    topTitle.textContent = `DFF Performance in ${selectedFilters['DB Name'] === 'All DBs' ? selectedFilters.Territory : selectedFilters['DB Name']} (by STT Ach %)`;
-                    
-                    sortedSrData.forEach((data, index) => {
-                        const rankText = `#${data.nationalRank}`; 
-                        const achievement = data.sttAchPercent;
-                        const status = getRAGStatus(achievement);
-                        const barWidth = Math.min(100, achievement).toFixed(2); 
-                        const gapPercent = achievement - timeElapsedPercent;
-                        const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                        const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                        const chartItem = document.createElement('div');
-                        chartItem.className = 'flex items-center';
-                        chartItem.innerHTML = `
-                            <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                                <div class="font-bold text-gray-900 truncate">${rankText} ${data.dffName}</div>
-                                <div class="text-xs text-gray-500 truncate">${data.dhName}</div>
-                            </div>
-                            <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                                <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                                <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                    ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                                </div>
-                                <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                    GAP: ${formattedGap}
-                                </span>
-                                ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                            </div>
-                        `;
-                        topContainer.appendChild(chartItem);
-                    });
-
-                } else {
-                    bottomContainerParent.style.display = 'block';
-
-                    topTitle.textContent = 'Top 10 DFF Nationally (by STT Ach %)';
-                    bottomTitle.textContent = 'Bottom 10 DFF Nationally (by STT Ach %)';
-                    
-                    const top10 = sortedSrData.slice(0, 10);
-                    const bottom10 = sortedSrData.slice(-10).reverse(); 
-                    const medals = ['🥇', '🥈', '🥉'];
-
-                    top10.forEach((data, index) => {
-                        const achievement = data.sttAchPercent;
-                        const status = getRAGStatus(achievement);
-                        const barWidth = Math.min(100, achievement).toFixed(2); 
-                        const gapPercent = achievement - timeElapsedPercent;
-                        const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                        const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-                        const medal = medals[index] || `<span>#${data.nationalRank}</span>`; 
-
-                        const chartItem = document.createElement('div');
-                        chartItem.className = 'flex items-center';
-                        chartItem.innerHTML = `
-                            <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                                <div class="font-bold text-gray-900 truncate">${medal} ${data.dffName}</div>
-                                <div class="text-xs text-gray-500 truncate">${data.dhName}</div>
-                            </div>
-                            <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                                <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                                <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                    ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                                </div>
-                                <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                    GAP: ${formattedGap}
-                                </span>
-                                ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                            </div>
-                        `;
-                        topContainer.appendChild(chartItem);
-                    });
-                    
-                    bottom10.forEach((data, index) => {
-                        const rank = data.nationalRank; 
-                        const achievement = data.sttAchPercent;
-                        const status = getRAGStatus(achievement);
-                        const barWidth = Math.max(0, Math.min(100, achievement)).toFixed(2);
-                        const gapPercent = achievement - timeElapsedPercent;
-                        const formattedGap = `${gapPercent > 0 ? '+' : ''}${gapPercent.toFixed(2)}%`;
-                        const gapColorClass = gapPercent >= 0 ? 'text-green-600' : 'text-red-600';
-
-                        const chartItem = document.createElement('div');
-                        chartItem.className = 'flex items-center';
-                        chartItem.innerHTML = `
-                            <div class="w-1/4 text-sm font-medium text-gray-700 truncate mr-4">
-                                <div class="font-bold text-gray-900 truncate">#${rank} ${data.dffName}</div>
-                                <div class="text-xs text-gray-500 truncate">${data.dhName}</div>
-                            </div>
-                            <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
-                                <div class="absolute h-full w-[2px] bg-blue-500 border-dashed border-l border-blue-700" style="left: ${timeElapsedPercent.toFixed(2)}%;"></div>
-                                <div class="chart-bar h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${status.color}" style="width: ${barWidth}%;">
-                                    ${achievement > 10 ? achievement.toFixed(1) + '%' : ''}
-                                </div>
-                                <span class="absolute right-2 text-xs font-bold ${gapColorClass} whitespace-nowrap">
-                                    GAP: ${formattedGap}
-                                </span>
-                                ${achievement <= 10 ? `<span class="absolute text-xs font-bold ${status.textColor}" style="left: calc(${barWidth}% + 5px);">${achievement.toFixed(1)}%</span>` : ''}
-                            </div>
-                        `;
-                        bottomContainer.appendChild(chartItem);
-                    });
-                }
-            }
-
-
-            function updateSrStatus(srDataArray) {
-                const srHealthContainer = document.getElementById('sr-health');
-                if (!srHealthContainer) return;
-
-                let green = 0;
-                let amber = 0;
-                let red = 0;
-                
-                const total = srDataArray.length;
-
-                srDataArray.forEach(sr => {
-                    const status = getRAGStatus(sr.sttAchPercent);
-                    if (status.text === 'Green') green++;
-                    else if (status.text === 'Amber') amber++;
-                    else red++;
-                });
-
-                const greenPct = total > 0 ? (green / total) * 100 : 0;
-                const amberPct = total > 0 ? (amber / total) * 100 : 0;
-                const redPct = total > 0 ? (red / total) * 100 : 0;
-
-                srHealthContainer.innerHTML = `
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">DFF Status (Total: ${total})</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct.toFixed(2)}%;">${green > 0 ? green : ''}</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct.toFixed(2)}%; ${amberPct > 0 || amber == 0 ? 'min-width: 1.5rem;' : ''}">${amber}</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: ${redPct.toFixed(2)}%;">${red > 0 ? red : ''}</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: ${green}</span>
-                        <span class="text-amber">85-90%: ${amber}</span>
-                        <span class="text-red">Below 85%: ${red}</span>
-                    </div>
-                `;
-            }
-
-            function updateDbStatus(dbDataArray) {
-                const dbHealthContainer = document.getElementById('db-health');
-                if (!dbHealthContainer) return;
-
-                let green = 0;
-                let amber = 0;
-                let red = 0;
-                
-                dbDataArray.forEach(db => calculatePercentages(db));
-                const total = dbDataArray.length;
-
-                dbDataArray.forEach(db => {
-                    const status = getRAGStatus(db.sttAchPercent);
-                    if (status.text === 'Green') green++;
-                    else if (status.text === 'Amber') amber++;
-                    else red++;
-                });
-
-                const greenPct = total > 0 ? (green / total) * 100 : 0;
-                const amberPct = total > 0 ? (amber / total) * 100 : 0;
-                const redPct = total > 0 ? (red / total) * 100 : 0;
-
-                dbHealthContainer.innerHTML = `
-                    <h3 class="text-md font-semibold text-gray-700 mb-2">DB Status (Total: ${total})</h3>
-                    <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
-                        <div class="chart-bar fill-green text-center text-white p-1" style="width: ${greenPct.toFixed(2)}%;">${green > 0 ? green : ''}</div>
-                        <div class="chart-bar fill-amber text-center text-white p-1" style="width: ${amberPct.toFixed(2)}%; ${amberPct > 0 || amber == 0 ? 'min-width: 1.5rem;' : ''}">${amber}</div> 
-                        <div class="chart-bar fill-red text-center text-white p-1" style="width: ${redPct.toFixed(2)}%;">${red > 0 ? red : ''}</div>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-green">Above 90%: ${green}</span>
-                        <span class="text-amber">85-90%: ${amber}</span>
-                        <span class="text-red">Below 85%: ${red}</span>
-                    </div>
-                `;
-            }
-            
-            // Initialize
-            preProcessData(); 
-            const initialTotals = calculateGrandTotals(fullSrData);
-            globalSttAch = initialTotals.sttAch;
-            const initialKpiData = updateKpiData(initialTotals);
-            populateKpiCards(initialKpiData);
-            populateTable('territory-list', processedTerritoryData, 'territory', 'tm');
-            populateTable('db-list', processedDbData, 'dhName', 'territory'); 
-            populateTable('sr-list', fullSrData, 'dffName', 'dhName', true); 
-            populateTerritoryChart(processedTerritoryData); 
-            populateDbChart(processedDbData); 
-            populateTopBottomSrCharts(fullSrData);
-            populateDateWiseChart(1); 
-            updateSrStatus(fullSrData);
-            updateDbStatus(processedDbData);
-            initializeFilters(); 
-            initializeTabs();
-            initializeTrendButtons();
-        });
     </script>
 </body>
 </html>
