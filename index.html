@@ -157,7 +157,7 @@
         <div class="spinner mb-4"></div>
         <h2 class="text-xl font-bold text-gray-700">Connecting to Live Data...</h2>
         <p class="text-sm text-gray-500">Fetching from Google Sheets</p>
-        <p id="error-details" class="text-xs text-red-500 mt-2 hidden"></p>
+        <p id="error-details" class="text-xs text-red-500 mt-2 hidden text-center max-w-md px-4"></p>
     </div>
 
     <div id="app" class="max-w-7xl mx-auto" style="display: none;">
@@ -281,8 +281,8 @@
         // Converted pubhtml link to fetchable CSV link with GID
         const CHART_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSW3e0Hgotn4crFK1ac2osytnFt7jaWlVSV5a1BURK-3zLU_Q9-LxbyTuCCMLa4tbO3-9nLhttdk-1v/pub?gid=573142787&single=true&output=csv';
 
-        const timeElapsedPercent = 34.6; 
-        const daysPassed = "9 out of 26";
+        const timeElapsedPercent = 33.33; 
+        const daysPassed = "9 out of 27";
         const LAC_DIVISOR = 100000;
         
         let selectedFilters = {
@@ -364,36 +364,31 @@
             return totals;
         }
 
-        // --- FETCHING LOGIC (With Proxy Fallback) ---
+        // --- FETCHING LOGIC (With Proxy Fallback for Local File Support) ---
         async function fetchCsvData(url) {
             const timestampedUrl = `${url}&t=${Date.now()}`;
             
-            // Strategy 1: CorsProxy.io (Best for simple CORS bypass)
+            // Strategy 1: AllOrigins JSON (Reliable for local file:// usage)
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(timestampedUrl)}`;
+                const response = await fetch(proxyUrl);
+                if (response.ok) {
+                    const jsonData = await response.json();
+                    if (jsonData.contents) return parseCsv(jsonData.contents);
+                }
+            } catch (e) { console.warn("AllOrigins JSON failed, trying next...", e); }
+
+            // Strategy 2: CorsProxy.io (Backup)
             try {
                 const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(timestampedUrl)}`;
                 const response = await fetch(proxyUrl);
                 if (response.ok) {
                     const text = await response.text();
-                    // Validate basic CSV structure to ensure we didn't get an HTML error page
-                    if (text.trim().length > 0 && !text.trim().toLowerCase().startsWith('<!doctype')) {
-                        return parseCsv(text);
-                    }
+                    return parseCsv(text);
                 }
-            } catch (e) { console.warn("CorsProxy failed, trying next...", e); }
+            } catch (e) { console.warn("CorsProxy failed", e); }
 
-            // Strategy 2: AllOrigins (Backup)
-            try {
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(timestampedUrl)}`;
-                const response = await fetch(proxyUrl);
-                if (response.ok) {
-                    const text = await response.text();
-                    if (text.trim().length > 0 && !text.trim().toLowerCase().startsWith('<!doctype')) {
-                        return parseCsv(text);
-                    }
-                }
-            } catch (e) { console.warn("AllOrigins failed", e); }
-
-            // Strategy 3: Direct (Last resort - will fail locally but might work if published + browser settings allow)
+            // Strategy 3: Direct (Will fail locally but works if published to a domain)
             try {
                 const response = await fetch(timestampedUrl);
                 if (response.ok) {
@@ -402,7 +397,7 @@
                 }
             } catch (e) { console.error("Direct fetch failed", e); }
 
-            throw new Error("Unable to fetch data. If running locally, this is likely due to browser security (CORS).");
+            throw new Error("Unable to fetch data. If running locally, browser security (CORS) might be blocking requests.");
         }
 
         function parseCsv(csvText) {
@@ -452,8 +447,30 @@
                     DISTRIBUTOR_NAME: row['DISTRIBUTOR_NAME']
                 }));
 
-                const lastDate = dailyRawData[dailyRawData.length - 1]?.calday || 'Unknown';
-                document.getElementById('data-date').innerText = `(Data as of ${lastDate})`;
+                // Format Date Nicely (e.g., Dec 10th)
+                const lastDateStr = dailyRawData[dailyRawData.length - 1]?.calday;
+                let dateDisplay = 'Unknown';
+                if (lastDateStr) {
+                    const dateObj = new Date(lastDateStr);
+                    if (!isNaN(dateObj)) {
+                        const day = dateObj.getDate();
+                        const month = dateObj.toLocaleString('default', { month: 'short' });
+                        const suffix = (d) => {
+                            if (d > 3 && d < 21) return 'th';
+                            switch (d % 10) {
+                                case 1:  return "st";
+                                case 2:  return "nd";
+                                case 3:  return "rd";
+                                default: return "th";
+                            }
+                        };
+                        dateDisplay = `${month} ${day}${suffix(day)}`;
+                    } else {
+                        dateDisplay = lastDateStr;
+                    }
+                }
+                
+                document.getElementById('data-date').innerText = `(Data as of ${dateDisplay})`;
                 document.querySelectorAll('.benchmark-text').forEach(el => el.textContent = `${timeElapsedPercent}%`);
 
                 preProcessData();
