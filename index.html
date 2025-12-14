@@ -166,7 +166,7 @@
         <header class="header-gradient p-6 rounded-xl shadow-xl mb-8 flex flex-col xl:flex-row justify-between items-start xl:items-center border border-gray-200">
             <div class="mb-4 xl:mb-0">
                 <h1 class="text-3xl sm:text-4xl font-extrabold text-white">SPARTA MTD Sales Performance</h1>
-                <p id="data-date" class="text-lg text-gray-200 mt-1">(Data as of 10th)</p>
+                <p id="data-date" class="text-lg text-gray-200 mt-1">(Data as of ...)</p>
             </div>
             
             <div id="filter-controls" class="flex flex-wrap gap-2 p-2 bg-gray-900/10 rounded-lg shadow-inner border border-gray-400">
@@ -281,8 +281,9 @@
         // Converted pubhtml link to fetchable CSV link with GID
         const CHART_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSW3e0Hgotn4crFK1ac2osytnFt7jaWlVSV5a1BURK-3zLU_Q9-LxbyTuCCMLa4tbO3-9nLhttdk-1v/pub?gid=573142787&single=true&output=csv';
 
-        const timeElapsedPercent = 33.33; 
-        const daysPassed = "9 out of 27";
+        // --- DYNAMIC VARIABLES (Calculated based on data) ---
+        let timeElapsedPercent = 0; 
+        let daysPassed = "";
         const LAC_DIVISOR = 100000;
         
         let selectedFilters = {
@@ -316,6 +317,16 @@
                 return isNaN(number) ? 0 : number;
             }
             return 0;
+        }
+
+        // --- NEW HELPER: Calculate Working Days (Excluding Fridays for Bangladesh) ---
+        function countWorkingDays(year, month, limitDay) {
+            let count = 0;
+            for(let d = 1; d <= limitDay; d++) {
+                const dayOfWeek = new Date(year, month, d).getDay();
+                if(dayOfWeek !== 5) count++; // 5 is Friday (Weekend in Bangladesh)
+            }
+            return count;
         }
 
         function calculatePercentages(data) {
@@ -447,31 +458,53 @@
                     DISTRIBUTOR_NAME: row['DISTRIBUTOR_NAME']
                 }));
 
-                // Format Date Nicely (e.g., Dec 10th)
-                const lastDateStr = dailyRawData[dailyRawData.length - 1]?.calday;
-                let dateDisplay = 'Unknown';
-                if (lastDateStr) {
-                    const dateObj = new Date(lastDateStr);
-                    if (!isNaN(dateObj)) {
-                        const day = dateObj.getDate();
-                        const month = dateObj.toLocaleString('default', { month: 'short' });
-                        const suffix = (d) => {
-                            if (d > 3 && d < 21) return 'th';
-                            switch (d % 10) {
-                                case 1:  return "st";
-                                case 2:  return "nd";
-                                case 3:  return "rd";
-                                default: return "th";
-                            }
-                        };
-                        dateDisplay = `${month} ${day}${suffix(day)}`;
-                    } else {
-                        dateDisplay = lastDateStr;
+                // --- DYNAMIC TIME CALCULATION LOGIC START ---
+                // Find the latest date in the dataset to use as "Current Date"
+                let maxDate = new Date();
+                let hasData = false;
+                
+                if (dailyRawData.length > 0) {
+                     // Sort to be sure we get the absolute latest date present in data
+                    const sortedDates = dailyRawData
+                        .map(r => new Date(r.calday))
+                        .filter(d => !isNaN(d))
+                        .sort((a,b) => b - a);
+                    
+                    if (sortedDates.length > 0) {
+                        maxDate = sortedDates[0];
+                        hasData = true;
                     }
                 }
-                
+
+                // Format Date Nicely for Header
+                const day = maxDate.getDate();
+                const monthName = maxDate.toLocaleString('default', { month: 'short' });
+                const suffix = (d) => {
+                    if (d > 3 && d < 21) return 'th';
+                    switch (d % 10) {
+                        case 1:  return "st";
+                        case 2:  return "nd";
+                        case 3:  return "rd";
+                        default: return "th";
+                    }
+                };
+                const dateDisplay = `${monthName} ${day}${suffix(day)}`;
                 document.getElementById('data-date').innerText = `(Data as of ${dateDisplay})`;
-                document.querySelectorAll('.benchmark-text').forEach(el => el.textContent = `${timeElapsedPercent}%`);
+
+                // Calculate Working Days & Percentage
+                const currentYear = maxDate.getFullYear();
+                const currentMonth = maxDate.getMonth(); // 0-indexed
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                
+                const passed = countWorkingDays(currentYear, currentMonth, day);
+                const total = countWorkingDays(currentYear, currentMonth, daysInMonth);
+                
+                daysPassed = `${passed} out of ${total}`;
+                timeElapsedPercent = (total > 0) ? (passed / total) * 100 : 0;
+                
+                // Update Benchmark Text in UI immediately
+                document.querySelectorAll('.benchmark-text').forEach(el => el.textContent = `${timeElapsedPercent.toFixed(2)}%`);
+                // --- DYNAMIC TIME CALCULATION LOGIC END ---
 
                 preProcessData();
                 initializeFilters();
@@ -957,4 +990,3 @@
     </script>
 </body>
 </html>
-
