@@ -219,13 +219,26 @@
                         <h2 class="text-xl font-bold text-gray-800">Daily Sales vs. ERC Trend</h2>
                         <p class="text-sm text-gray-500">Day-wise trend of STT Achievement (Line) vs. ERC Achievement (Column).</p>
                     </div>
-                    <div class="flex flex-wrap gap-2" id="trend-buttons">
-                        <button class="trend-btn active" data-filter="MTD">MTD</button>
-                        <button class="trend-btn" data-filter="L3D">L3D</button>
-                        <button class="trend-btn" data-filter="W1">W1</button>
-                        <button class="trend-btn" data-filter="W2">W2</button>
-                        <button class="trend-btn" data-filter="W3">W3</button>
-                        <button class="trend-btn" data-filter="W4">W4</button>
+                    <div class="flex flex-wrap items-center gap-3" id="trend-controls-wrapper">
+                        <!-- DFF Trend Filter -->
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Filter Trend by DFF</label>
+                            <select id="dff-trend-filter" class="py-1 px-2 border border-gray-300 rounded text-xs font-semibold text-gray-700 bg-white shadow-sm focus:ring-1 focus:ring-purple-500 outline-none min-w-[140px]">
+                                <option value="All DFFs">All DFFs</option>
+                            </select>
+                        </div>
+                        <!-- Period Buttons -->
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Time Period</label>
+                            <div class="flex gap-1" id="trend-buttons">
+                                <button class="trend-btn active" data-filter="MTD">MTD</button>
+                                <button class="trend-btn" data-filter="L3D">L3D</button>
+                                <button class="trend-btn" data-filter="W1">W1</button>
+                                <button class="trend-btn" data-filter="W2">W2</button>
+                                <button class="trend-btn" data-filter="W3">W3</button>
+                                <button class="trend-btn" data-filter="W4">W4</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="relative h-80 md:h-96">
@@ -278,26 +291,25 @@
 
         // --- URLS UPDATED ---
         const MTD_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSW3e0Hgotn4crFK1ac2osytnFt7jaWlVSV5a1BURK-3zLU_Q9-LxbyTuCCMLa4tbO3-9nLhttdk-1v/pub?output=csv';
-        // Converted pubhtml link to fetchable CSV link with GID
         const CHART_DATA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSW3e0Hgotn4crFK1ac2osytnFt7jaWlVSV5a1BURK-3zLU_Q9-LxbyTuCCMLa4tbO3-9nLhttdk-1v/pub?gid=573142787&single=true&output=csv';
 
-        // --- DYNAMIC VARIABLES (Calculated based on data) ---
+        // --- DYNAMIC VARIABLES ---
         let timeElapsedPercent = 0; 
         let daysPassed = "";
-        let totalWorkingDaysInMonth = 26; // Default fallback
+        let totalWorkingDaysInMonth = 26;
         const LAC_DIVISOR = 100000;
         
         let selectedFilters = {
             'Area': 'All Areas',
             'Territory': 'All Territories',
-            'DB Name': 'All DBs'
+            'DB Name': 'All DBs',
+            'DFF Name': 'All DFFs' // Added DFF filter state
         };
         
         let activeTab = 'territory';
         let activeTrendFilter = 'MTD';
-        let globalSttRatio = 1;
         
-        let areaSelect, territorySelect, dbNameSelect;
+        let areaSelect, territorySelect, dbNameSelect, dffTrendSelect;
         let comboChartInstance = null;
 
         let rawSrData = [];
@@ -305,7 +317,6 @@
         let processedTerritoryData = [];
         let processedDbData = [];
 
-        // Parse Helper
         function parseNumeric(value) {
             if (typeof value === 'number') return value;
             if (typeof value === 'string') {
@@ -320,17 +331,17 @@
             return 0;
         }
 
-        // --- NEW HELPER: Calculate Working Days (Excluding Fridays for Bangladesh) ---
         function countWorkingDays(year, month, limitDay) {
             let count = 0;
             for(let d = 1; d <= limitDay; d++) {
                 const dayOfWeek = new Date(year, month, d).getDay();
-                if(dayOfWeek !== 5) count++; // 5 is Friday (Weekend in Bangladesh)
+                if(dayOfWeek !== 5) count++; 
             }
             return count;
         }
 
         function calculatePercentages(data) {
+            if (!data) return {};
             data.sttAchPercent = (data.sttTgt > 0) ? (data.sttAch / data.sttTgt) * 100 : 0;
             data.ercAchPercent = (data.ercTgt > 0) ? (data.ercAch / data.ercTgt) * 100 : 0;
             data.sfTbrAchPercent = (data.sfTbrTgt > 0) ? (data.sfTbrAch / data.sfTbrTgt) * 100 : 0;
@@ -339,10 +350,11 @@
         }
 
         function getRAGStatus(percentage) {
+            const val = percentage || 0;
             const benchmarkHigh = timeElapsedPercent * 0.90;
             const benchmarkLow = timeElapsedPercent * 0.85;
-            if (percentage >= benchmarkHigh) return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
-            else if (percentage >= benchmarkLow) return { color: 'fill-amber', text: 'Amber', ring: 'ring-amber', textColor: 'text-amber' };
+            if (val >= benchmarkHigh) return { color: 'fill-green', text: 'Green', ring: 'ring-green', textColor: 'text-green' };
+            else if (val >= benchmarkLow) return { color: 'fill-amber', text: 'Amber', ring: 'ring-amber', textColor: 'text-amber' };
             else return { color: 'fill-red', text: 'Red', ring: 'ring-red', textColor: 'text-red' };
         }
 
@@ -351,7 +363,7 @@
         }
 
         function formatCount(amount) {
-            return Math.round(amount).toLocaleString('en-US', { maximumFractionDigits: 0 });
+            return Math.round(amount || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
         }
         
         function formatValue(value, unit) {
@@ -369,18 +381,11 @@
                     if (!isNaN(val)) totals[key] += val;
                 }
             });
-            totals.sttAchPercent = (totals.sttTgt > 0) ? (totals.sttAch / totals.sttTgt) * 100 : 0;
-            totals.ercAchPercent = (totals.ercTgt > 0) ? (totals.ercAch / totals.ercTgt) * 100 : 0;
-            totals.sfTbrAchPercent = (totals.sfTbrTgt > 0) ? (totals.sfTbrAch / totals.sfTbrTgt) * 100 : 0;
-            totals.premiumSkuAchPercent = (totals.premiumSkuGoal > 0) ? (totals.premiumSkuAch / totals.premiumSkuGoal) * 100 : 0;
-            return totals;
+            return calculatePercentages(totals);
         }
 
-        // --- FETCHING LOGIC (With Proxy Fallback for Local File Support) ---
         async function fetchCsvData(url) {
             const timestampedUrl = `${url}&t=${Date.now()}`;
-            
-            // Strategy 1: AllOrigins JSON (Reliable for local file:// usage)
             try {
                 const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(timestampedUrl)}`;
                 const response = await fetch(proxyUrl);
@@ -388,35 +393,18 @@
                     const jsonData = await response.json();
                     if (jsonData.contents) return parseCsv(jsonData.contents);
                 }
-            } catch (e) { console.warn("AllOrigins JSON failed, trying next...", e); }
-
-            // Strategy 2: CorsProxy.io (Backup)
-            try {
-                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(timestampedUrl)}`;
-                const response = await fetch(proxyUrl);
-                if (response.ok) {
-                    const text = await response.text();
-                    return parseCsv(text);
-                }
-            } catch (e) { console.warn("CorsProxy failed", e); }
-
-            // Strategy 3: Direct (Will fail locally but works if published to a domain)
+            } catch (e) { console.warn("Proxy failed", e); }
             try {
                 const response = await fetch(timestampedUrl);
-                if (response.ok) {
-                    const text = await response.text();
-                    return parseCsv(text);
-                }
+                if (response.ok) return parseCsv(await response.text());
             } catch (e) { console.error("Direct fetch failed", e); }
-
-            throw new Error("Unable to fetch data. If running locally, browser security (CORS) might be blocking requests.");
+            throw new Error("Unable to fetch data.");
         }
 
         function parseCsv(csvText) {
             return new Promise((resolve) => {
                 Papa.parse(csvText, {
-                    header: true,
-                    skipEmptyLines: true,
+                    header: true, skipEmptyLines: true,
                     complete: (results) => resolve(results.data)
                 });
             });
@@ -429,7 +417,6 @@
                     fetchCsvData(CHART_DATA_URL)
                 ]);
 
-                // Process SR Data (MTD)
                 rawSrData = mtdData.map(sr => ({
                     area: sr['AREA'] || sr['Area'],
                     territory: sr['TERRITORY'] || sr['Territory'],
@@ -449,36 +436,25 @@
                     premiumSkuAch: parseNumeric(sr['PREMIUM SKU ERC ACH'])
                 }));
 
-                // Process Daily Data
                 dailyRawData = chartData.map(row => ({
                     calday: row['CALDAY'],
                     sales: parseNumeric(row['SALES']),
                     erc: parseNumeric(row['ERC']),
                     AREA: row['AREA'],
                     TERRITORY: row['TERRITORY'],
-                    DISTRIBUTOR_NAME: row['DISTRIBUTOR_NAME']
+                    DISTRIBUTOR_NAME: row['DISTRIBUTOR_NAME'],
+                    DFF_NAME: row['DFF_NAME'] // Map DFF Name for trend filtering
                 }));
 
-                // --- DYNAMIC TIME CALCULATION LOGIC START ---
-                // Find the latest date in the dataset to use as "Current Date"
                 let maxDate = new Date();
-                let hasData = false;
-                
                 if (dailyRawData.length > 0) {
-                     // Sort to be sure we get the absolute latest date present in data
-                     // This ensures that even if data spans multiple months, we grab the latest one
                     const sortedDates = dailyRawData
                         .map(r => new Date(r.calday))
                         .filter(d => !isNaN(d.getTime()))
                         .sort((a,b) => b - a);
-                    
-                    if (sortedDates.length > 0) {
-                        maxDate = sortedDates[0];
-                        hasData = true;
-                    }
+                    if (sortedDates.length > 0) maxDate = sortedDates[0];
                 }
 
-                // Format Date Nicely for Header
                 const day = maxDate.getDate();
                 const monthName = maxDate.toLocaleString('default', { month: 'short' });
                 const suffix = (d) => {
@@ -490,30 +466,19 @@
                         default: return "th";
                     }
                 };
-                const dateDisplay = `${monthName} ${day}${suffix(day)}`;
-                document.getElementById('data-date').innerText = `(Data as of ${dateDisplay})`;
+                document.getElementById('data-date').innerText = `(Data as of ${monthName} ${day}${suffix(day)})`;
 
-                // Calculate Working Days & Percentage
-                // IMPORTANT: Use the year and month of the LATEST date found in the report
                 const currentYear = maxDate.getFullYear();
-                const currentMonth = maxDate.getMonth(); // 0-indexed
+                const currentMonth = maxDate.getMonth();
                 const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-                
-                // Passed: count working days from the 1st of THIS month to the latest date
-                // This correctly handles "Last date count for month" logic
                 const passed = countWorkingDays(currentYear, currentMonth, day);
-                // Total: count working days for the ENTIRE month of the latest date
                 const total = countWorkingDays(currentYear, currentMonth, daysInMonth);
                 
-                // Update global variable for chart use
                 totalWorkingDaysInMonth = total;
-
                 daysPassed = `${passed} out of ${total}`;
                 timeElapsedPercent = (total > 0) ? (passed / total) * 100 : 0;
                 
-                // Update Benchmark Text in UI immediately
                 document.querySelectorAll('.benchmark-text').forEach(el => el.textContent = `${timeElapsedPercent.toFixed(2)}%`);
-                // --- DYNAMIC TIME CALCULATION LOGIC END ---
 
                 preProcessData();
                 initializeFilters();
@@ -523,18 +488,21 @@
                 document.getElementById('app').style.display = 'block';
 
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Init Error:", error);
                 document.querySelector('#loading-overlay h2').innerText = "Connection Failed";
-                document.querySelector('#loading-overlay p').innerText = "Failed to load data. This often happens when opening an HTML file directly from the desktop due to browser security (CORS). Try using a local server extension (like Live Server in VS Code).";
                 document.getElementById('error-details').innerText = error.message;
                 document.getElementById('error-details').classList.remove('hidden');
             }
         }
 
         function preProcessData() {
-            const nationallySortedSrs = [...rawSrData].map(item => calculatePercentages(item)).sort((a, b) => b.sttAchPercent - a.sttAchPercent);
-            nationallySortedSrs.forEach((sr, index) => { sr.nationalRank = index + 1; });
-            
+            rawSrData = rawSrData.map(sr => calculatePercentages(sr));
+
+            const nationallySortedSrs = [...rawSrData].sort((a, b) => (b.sttAchPercent || 0) - (a.sttAchPercent || 0));
+            nationallySortedSrs.forEach((sr, index) => {
+                sr.nationalRank = index + 1;
+            });
+
             const territoryMap = new Map();
             rawSrData.forEach(sr => {
                 const key = sr.territory;
@@ -579,14 +547,17 @@
                 const matchArea = selectedFilters.Area === 'All Areas' || row.AREA === selectedFilters.Area;
                 const matchTerritory = selectedFilters.Territory === 'All Territories' || row.TERRITORY === selectedFilters.Territory;
                 const matchDb = selectedFilters['DB Name'] === 'All DBs' || row.DISTRIBUTOR_NAME === selectedFilters['DB Name'];
-                return matchArea && matchTerritory && matchDb;
+                const matchDff = selectedFilters['DFF Name'] === 'All DFFs' || row.DFF_NAME === selectedFilters['DFF Name'];
+                return matchArea && matchTerritory && matchDb && matchDff;
             });
 
             filteredDailyData.forEach(row => {
-                const dateObj = new Date(row.calday);
-                const dateKey = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' }); 
                 const rawDate = row.calday;
-                if (!aggMap.has(rawDate)) aggMap.set(rawDate, { date: rawDate, label: dateKey, sales: 0, erc: 0 });
+                if (!aggMap.has(rawDate)) {
+                    const dateObj = new Date(rawDate);
+                    const label = dateObj.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+                    aggMap.set(rawDate, { date: rawDate, label, sales: 0, erc: 0 });
+                }
                 const entry = aggMap.get(rawDate);
                 entry.sales += row.sales;
                 entry.erc += row.erc;
@@ -606,21 +577,15 @@
             return data;
         }
 
-        function populateDateWiseChart(ratio = 1, filterType = 'MTD', totalTarget = 0) {
+        function populateDateWiseChart(filterType = 'MTD', totalTarget = 0) {
             const ctx = document.getElementById('comboChart');
             if (!ctx) return; 
-            let chartDataRaw = getAggregatedDailyData();
-            chartDataRaw = filterTrendData(chartDataRaw, filterType);
+            let chartDataRaw = filterTrendData(getAggregatedDailyData(), filterType);
 
             const labels = chartDataRaw.map(d => `${d.label} (${d.dateObj.toLocaleDateString('en-US', { weekday: 'short' })})`);
             const barBackgroundColors = chartDataRaw.map(d => d.dateObj.getDay() === 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(17, 153, 142, 0.7)');
             const barBorderColors = chartDataRaw.map(d => d.dateObj.getDay() === 5 ? 'rgba(220, 38, 38, 1)' : 'rgba(17, 153, 142, 1)');
             
-            // Use dynamic total working days instead of hardcoded 26
-            const divisor = totalWorkingDaysInMonth > 0 ? totalWorkingDaysInMonth : 26;
-            const dailyRrValue = (totalTarget / divisor) / LAC_DIVISOR;
-            const rrData = new Array(labels.length).fill(dailyRrValue);
-
             if (comboChartInstance) comboChartInstance.destroy();
 
             comboChartInstance = new Chart(ctx, {
@@ -629,8 +594,7 @@
                     labels: labels,
                     datasets: [
                         { label: 'ERC Ach', data: chartDataRaw.map(d => d.erc), type: 'line', borderColor: '#6a0dad', backgroundColor: '#6a0dad', borderWidth: 3, tension: 0.4, yAxisID: 'y1', order: 1, datalabels: { align: 'top', anchor: 'start', color: '#6a0dad', font: { weight: 'bold', size: 11 }, offset: 4 }},
-                        { label: `Daily RR: ${dailyRrValue.toFixed(2)}`, data: rrData, type: 'line', borderColor: '#ef4444', borderDash: [5, 5], borderWidth: 2, pointRadius: 0, fill: false, yAxisID: 'y', order: 0, datalabels: { display: false }},
-                        { label: 'Sales (Lac)', data: chartDataRaw.map(d => d.sales), type: 'bar', backgroundColor: barBackgroundColors, borderColor: barBorderColors, borderWidth: 1, borderRadius: 4, yAxisID: 'y', order: 2, datalabels: { align: 'end', anchor: 'end', color: '#0d7a71', font: { weight: 'bold', size: 10 }, formatter: v => v.toFixed(2) }}
+                        { label: 'Sales (Lac)', data: chartDataRaw.map(d => d.sales), type: 'bar', backgroundColor: barBackgroundColors, borderColor: barBorderColors, borderWidth: 1, borderRadius: 4, yAxisID: 'y', order: 2, datalabels: { align: 'end', anchor: 'end', color: '#0d7a71', font: { weight: 'bold', size: 10 }, formatter: v => (v || 0).toFixed(2) }}
                     ]
                 },
                 options: {
@@ -641,37 +605,33 @@
             });
         }
 
-        // --- FILTER & UI LOGIC ---
         function applyFilters() {
-            let filteredTerritories = [...processedTerritoryData];
-            let filteredDbs = [...processedDbData];
             let filteredSrs = [...rawSrData];
-
             if (selectedFilters.Area !== 'All Areas') filteredSrs = filteredSrs.filter(data => data.area === selectedFilters.Area);
             if (selectedFilters.Territory !== 'All Territories') filteredSrs = filteredSrs.filter(data => data.territory === selectedFilters.Territory);
             if (selectedFilters['DB Name'] !== 'All DBs') filteredSrs = filteredSrs.filter(data => data.dhName === selectedFilters['DB Name']);
             
+            // Special local DFF filtering for KPIs and Status (Global Filter logic)
+            // Note: The Trend Chart uses selectedFilters['DFF Name'] separately handled in getAggregatedDailyData
+            
             const activeTerritories = new Set(filteredSrs.map(sr => sr.territory));
             const activeDbNames = new Set(filteredSrs.map(sr => sr.dhName));
             
-            filteredTerritories = processedTerritoryData.filter(t => activeTerritories.has(t.territory));
-            filteredDbs = processedDbData.filter(db => activeDbNames.has(db.dhName));
+            const filteredTerritories = processedTerritoryData.filter(t => activeTerritories.has(t.territory));
+            const filteredDbs = processedDbData.filter(db => activeDbNames.has(db.dhName));
 
             const totals = calculateGrandTotals(filteredSrs);
-            const newKpiData = updateKpiData(totals);
-
-            populateKpiCards(newKpiData);
+            populateKpiCards(updateKpiData(totals));
             populateTable('territory-list', filteredTerritories, 'territory', 'tm');
             populateTable('db-list', filteredDbs, 'dhName', 'territory');
-            populateTable('sr-list', filteredSrs, 'dffName', 'dhName', true); 
+            populateTable('sr-list', filteredSrs, 'dffName', 'dhName'); 
             
             populateTerritoryChart(filteredTerritories);
             populateDbChart(filteredDbs);
             populateTopBottomSrCharts(filteredSrs);
             updateSrStatus(filteredSrs); 
             updateDbStatus(filteredDbs); 
-            
-            populateDateWiseChart(1, activeTrendFilter, totals.sttTgt);
+            populateDateWiseChart(activeTrendFilter, totals.sttTgt);
         }
 
         function initializeTrendButtons() {
@@ -680,14 +640,15 @@
                     document.querySelectorAll('.trend-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     activeTrendFilter = btn.getAttribute('data-filter');
-                    
-                    let filteredSrs = [...rawSrData];
-                    if (selectedFilters.Area !== 'All Areas') filteredSrs = filteredSrs.filter(d => d.area === selectedFilters.Area);
-                    if (selectedFilters.Territory !== 'All Territories') filteredSrs = filteredSrs.filter(d => d.territory === selectedFilters.Territory);
-                    if (selectedFilters['DB Name'] !== 'All DBs') filteredSrs = filteredSrs.filter(d => d.dhName === selectedFilters['DB Name']);
-                    
-                    populateDateWiseChart(1, activeTrendFilter, calculateGrandTotals(filteredSrs).sttTgt);
+                    applyFilters();
                 });
+            });
+
+            // Initialize DFF Trend Filter listener
+            dffTrendSelect = document.getElementById('dff-trend-filter');
+            dffTrendSelect.addEventListener('change', (e) => {
+                selectedFilters['DFF Name'] = e.target.value;
+                applyFilters(); // Re-run all filters including chart
             });
         }
 
@@ -707,6 +668,9 @@
             dbNameSelect = dbDrop.select;
 
             controls.append(areaDrop.wrapper, terrDrop.wrapper, dbDrop.wrapper);
+            
+            // Initial population of DFF trend select
+            updateDependentFilters('Init');
         }
 
         function createFilterDropdown(name, options) {
@@ -720,8 +684,7 @@
             
             options.forEach(opt => {
                 const el = document.createElement('option');
-                el.value = opt;
-                el.textContent = opt;
+                el.value = opt; el.textContent = opt;
                 select.appendChild(el);
             });
 
@@ -738,21 +701,31 @@
         function updateDependentFilters(changed) {
             let srs = [...rawSrData];
             if (selectedFilters.Area !== 'All Areas') srs = srs.filter(s => s.area === selectedFilters.Area);
-            
-            if (changed === 'Area') {
+            if (changed === 'Area' || changed === 'Init') {
                 const terrs = ['All Territories', ...new Set(srs.map(s => s.territory).sort())];
                 updateSelectOptions(territorySelect, terrs, 'Territory');
             }
-
             if (selectedFilters.Territory !== 'All Territories') srs = srs.filter(s => s.territory === selectedFilters.Territory);
-            
-            if (changed === 'Area' || changed === 'Territory') {
+            if (changed === 'Area' || changed === 'Territory' || changed === 'Init') {
                 const dbs = ['All DBs', ...new Set(srs.map(s => s.dhName).sort())];
                 updateSelectOptions(dbNameSelect, dbs, 'DB Name');
+            }
+            
+            // Link DFF Trend Filter with the hierarchy
+            if (changed !== 'TrendDFF') {
+                const filteredSrs = rawSrData.filter(s => {
+                    const matchArea = selectedFilters.Area === 'All Areas' || s.area === selectedFilters.Area;
+                    const matchTerritory = selectedFilters.Territory === 'All Territories' || s.territory === selectedFilters.Territory;
+                    const matchDb = selectedFilters['DB Name'] === 'All DBs' || s.dhName === selectedFilters['DB Name'];
+                    return matchArea && matchTerritory && matchDb;
+                });
+                const dffs = ['All DFFs', ...new Set(filteredSrs.map(s => s.dffName).sort())];
+                updateSelectOptions(document.getElementById('dff-trend-filter'), dffs, 'DFF Name');
             }
         }
 
         function updateSelectOptions(select, options, key) {
+            if (!select) return;
             const current = selectedFilters[key];
             select.innerHTML = '';
             options.forEach(opt => {
@@ -765,26 +738,20 @@
         }
 
         function initializeTabs() {
-            const tabs = {
-                'tab-territory': { panel: 'panel-territory', chart: 'territory-chart-container', srPanel: 'visuals-panel-main', dbChart: 'db-chart-container', srVis: 'visuals-panel-sr' },
-                'tab-db': { panel: 'panel-db', chart: 'db-chart-container', srPanel: 'visuals-panel-main', hideChart: 'territory-chart-container', srVis: 'visuals-panel-sr' },
-                'tab-sr': { panel: 'panel-sr', srVis: 'visuals-panel-sr', hideMain: 'visuals-panel-main', hideT: 'panel-territory', hideD: 'panel-db' }
-            };
-
-            Object.keys(tabs).forEach(tabId => {
+            const tabs = ['tab-territory', 'tab-db', 'tab-sr'];
+            tabs.forEach(tabId => {
                 document.getElementById(tabId).addEventListener('click', () => {
-                    document.querySelectorAll('.tab-button').forEach(b => {
-                        b.classList.remove('tab-active'); b.classList.add('tab-inactive');
+                    tabs.forEach(id => {
+                        const btn = document.getElementById(id);
+                        btn.classList.remove('tab-active'); btn.classList.add('tab-inactive');
                     });
                     document.getElementById(tabId).classList.add('tab-active');
                     document.getElementById(tabId).classList.remove('tab-inactive');
 
-                    // Reset Visibility
                     ['panel-territory', 'panel-db', 'panel-sr', 'territory-chart-container', 'db-chart-container', 'visuals-panel-main', 'visuals-panel-sr'].forEach(id => {
                         document.getElementById(id).style.display = 'none';
                     });
 
-                    // Set visibility based on logic
                     if (tabId === 'tab-territory') {
                         document.getElementById('panel-territory').style.display = 'block';
                         document.getElementById('territory-chart-container').style.display = 'block';
@@ -797,32 +764,31 @@
                         document.getElementById('panel-sr').style.display = 'block';
                         document.getElementById('visuals-panel-sr').style.display = 'grid';
                     }
-                    applyFilters();
                 });
             });
         }
 
         function updateKpiData(totals) {
             const newKpiData = {
-                timeElapsed: { label: "Time Elapsed", percentage: timeElapsedPercent, valueText: daysPassed + " Working Days Passed", rag: { color: 'fill-blue', border: 'border-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' }, isBenchmark: true },
-                mtdStt: { label: "MTD STT Ach", percentage: totals.sttAchPercent, unit: "Lac", target: totals.sttTgt, achieved: totals.sttAch },
-                mtdErc: { label: "MTD ERC Ach", percentage: totals.ercAchPercent, unit: "Stores", target: totals.ercTgt, achieved: totals.ercAch },
+                timeElapsed: { label: "Time Elapsed", percentage: timeElapsedPercent, valueText: daysPassed + " Working Days Passed", rag: { color: 'fill-blue', text: 'Benchmark', textColor: 'text-blue', ring: 'ring-blue' }, isBenchmark: true },
+                mtdStt: { label: "MTD STT Ach", percentage: totals.sttAchPercent || 0, unit: "Lac", target: totals.sttTgt, achieved: totals.sttAch },
+                mtdErc: { label: "MTD ERC Ach", percentage: totals.ercAchPercent || 0, unit: "Stores", target: totals.ercTgt, achieved: totals.ercAch },
                 sfTbr: { label: "SF TBR Vol.", percentage: (totals.sfTbrTgt > 0 ? (totals.sfTbrAch/totals.sfTbrTgt)*100 : 0), unit: "TBRs", target: totals.sfTbrTgt, achieved: totals.sfTbrAch },
-                premiumTp: { label: "Premium TP Ach", percentage: totals.premiumSkuAchPercent, unit: "Stores", target: totals.premiumSkuGoal, achieved: totals.premiumSkuAch }
+                premiumTp: { label: "Premium TP Ach", percentage: totals.premiumSkuAchPercent || 0, unit: "Stores", target: totals.premiumSkuGoal, achieved: totals.premiumSkuAch }
             };
-            // RAG
             ['mtdStt', 'mtdErc', 'sfTbr', 'premiumTp'].forEach(k => newKpiData[k].rag = getRAGStatus(newKpiData[k].percentage));
             return newKpiData;
         }
 
         function createKpiCard(kpi) {
             const rag = kpi.rag;
-            let mainValue = kpi.isBenchmark ? kpi.percentage.toFixed(2) + '%' : (kpi.label.includes('SF TBR') ? formatCount(kpi.achieved) : kpi.percentage.toFixed(2) + '%');
+            const perc = kpi.percentage || 0;
+            let mainValue = kpi.isBenchmark ? perc.toFixed(2) + '%' : (kpi.label.includes('SF TBR') ? formatCount(kpi.achieved) : perc.toFixed(2) + '%');
             let subContent = kpi.isBenchmark ? `<p class="text-sm text-gray-500 mt-2 font-medium">${kpi.valueText}</p>` : '';
 
             if (!kpi.isBenchmark) {
                 const bal = kpi.target - kpi.achieved;
-                const diff = kpi.percentage - timeElapsedPercent;
+                const diff = perc - timeElapsedPercent;
                 const diffHtml = !kpi.label.includes('SF TBR') ? `<div class="flex justify-between items-center text-gray-600"><span class="text-xs font-medium">vs. Time Elapsed:</span><span class="font-bold text-sm ${diff < 0 ? 'text-red-600' : 'text-green-600'}">${diff > 0 ? '+' : ''}${diff.toFixed(2)}%</span></div>` : '';
                 
                 subContent = `
@@ -843,7 +809,7 @@
                         <span class="w-3 h-3 rounded-full ${rag.color.replace('fill-', 'bg-')} ring-2 ring-offset-2 ${rag.ring}"></span>
                     </div>
                     <div class="text-3xl md:text-4xl font-extrabold mt-1 ${rag.textColor}">${mainValue}</div>
-                    <div class="gauge-meter mt-4 mb-3"><div class="gauge-fill ${rag.color}" style="width: ${Math.min(100, kpi.percentage).toFixed(2)}%"></div></div>
+                    <div class="gauge-meter mt-4 mb-3"><div class="gauge-fill ${rag.color}" style="width: ${Math.min(100, perc).toFixed(2)}%"></div></div>
                     ${subContent}
                 </div>`;
         }
@@ -856,18 +822,18 @@
             });
         }
 
-        function populateTable(id, data, nameKey, subKey, isSr = false) {
+        function populateTable(id, data, nameKey, subKey) {
             const tbody = document.getElementById(id);
             const table = tbody.closest('table');
             if (table.tFoot) table.tFoot.remove();
             tbody.innerHTML = '';
 
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="13" class="text-center py-4 text-gray-500">No data found.</td></tr>`;
                 return;
             }
 
-            data.sort((a, b) => b.sttAchPercent - a.sttAchPercent).forEach(row => {
+            data.sort((a, b) => (b.sttAchPercent || 0) - (a.sttAchPercent || 0)).forEach(row => {
                 const sttC = getRAGStatus(row.sttAchPercent).textColor;
                 const ercC = getRAGStatus(row.ercAchPercent).textColor;
                 const pskuC = getRAGStatus(row.premiumSkuAchPercent).textColor;
@@ -879,21 +845,20 @@
                     <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10 shadow-sm">${row[nameKey]}<div class="text-xs text-gray-500">${row[subKey] || ''}</div></td>
                     <td class="px-3 py-3 text-center text-sm text-gray-500">${formatInLac(row.sttTgt)}</td>
                     <td class="px-3 py-3 text-center text-sm font-medium ${sttC}">${formatInLac(row.sttAch)}</td>
-                    <td class="px-3 py-3 text-center text-sm font-bold ${sttC}">${row.sttAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${sttC}">${(row.sttAchPercent || 0).toFixed(2)}%</td>
                     <td class="px-3 py-3 text-center text-sm text-gray-500">${formatCount(row.ercTgt)}</td>
                     <td class="px-3 py-3 text-center text-sm font-medium ${ercC}">${formatCount(row.ercAch)}</td>
-                    <td class="px-3 py-3 text-center text-sm font-bold ${ercC}">${row.ercAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${ercC}">${(row.ercAchPercent || 0).toFixed(2)}%</td>
                     <td class="px-3 py-3 text-center text-sm text-gray-500">${formatCount(row.sfTbrTgt)}</td>
                     <td class="px-3 py-3 text-center text-sm font-medium ${sfC}">${formatCount(row.sfTbrAch)}</td>
-                    <td class="px-3 py-3 text-center text-sm font-bold ${sfC}">${row.sfTbrAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${sfC}">${(row.sfTbrAchPercent || 0).toFixed(2)}%</td>
                     <td class="px-3 py-3 text-center text-sm text-gray-500">${formatCount(row.premiumSkuGoal)}</td>
                     <td class="px-3 py-3 text-center text-sm font-medium ${pskuC}">${formatCount(row.premiumSkuAch)}</td>
-                    <td class="px-3 py-3 text-center text-sm font-bold ${pskuC}">${row.premiumSkuAchPercent.toFixed(2)}%</td>
+                    <td class="px-3 py-3 text-center text-sm font-bold ${pskuC}">${(row.premiumSkuAchPercent || 0).toFixed(2)}%</td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // Grand Total Footer
             const t = calculateGrandTotals(data);
             const foot = document.createElement('tfoot');
             foot.className = 'bg-gray-100 font-bold border-t-2 border-gray-300';
@@ -901,45 +866,47 @@
                 <td class="px-3 py-3 sticky left-0 bg-gray-100 z-10">GRAND TOTAL</td>
                 <td class="px-3 py-3 text-center text-gray-700">${formatInLac(t.sttTgt)}</td>
                 <td class="px-3 py-3 text-center text-gray-900">${formatInLac(t.sttAch)}</td>
-                <td class="px-3 py-3 text-center ${getRAGStatus(t.sttAchPercent).textColor}">${t.sttAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.sttAchPercent).textColor}">${(t.sttAchPercent || 0).toFixed(2)}%</td>
                 <td class="px-3 py-3 text-center text-gray-700">${formatCount(t.ercTgt)}</td>
                 <td class="px-3 py-3 text-center text-gray-900">${formatCount(t.ercAch)}</td>
-                <td class="px-3 py-3 text-center ${getRAGStatus(t.ercAchPercent).textColor}">${t.ercAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.ercAchPercent).textColor}">${(t.ercAchPercent || 0).toFixed(2)}%</td>
                 <td class="px-3 py-3 text-center text-gray-700">${formatCount(t.sfTbrTgt)}</td>
                 <td class="px-3 py-3 text-center text-gray-900">${formatCount(t.sfTbrAch)}</td>
-                <td class="px-3 py-3 text-center ${getRAGStatus(t.sfTbrAchPercent).textColor}">${t.sfTbrAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.sfTbrAchPercent).textColor}">${(t.sfTbrAchPercent || 0).toFixed(2)}%</td>
                 <td class="px-3 py-3 text-center text-gray-700">${formatCount(t.premiumSkuGoal)}</td>
                 <td class="px-3 py-3 text-center text-gray-900">${formatCount(t.premiumSkuAch)}</td>
-                <td class="px-3 py-3 text-center ${getRAGStatus(t.premiumSkuAchPercent).textColor}">${t.premiumSkuAchPercent.toFixed(2)}%</td>
+                <td class="px-3 py-3 text-center ${getRAGStatus(t.premiumSkuAchPercent).textColor}">${(t.premiumSkuAchPercent || 0).toFixed(2)}%</td>
             </tr>`;
             table.appendChild(foot);
         }
 
-        // --- Chart Populators (Reusable for Territory, DB, Top/Bottom) ---
         function createBarChart(containerId, dataArray, labelKey, subKey) {
             const container = document.getElementById(containerId);
             container.innerHTML = '';
-            if (dataArray.length === 0) { container.innerHTML = '<div class="text-center py-8 text-gray-500">No data</div>'; return; }
+            if (!dataArray || dataArray.length === 0) { container.innerHTML = '<div class="text-center py-8 text-gray-500">No data</div>'; return; }
 
-            dataArray.sort((a,b) => b.sttAchPercent - a.sttAchPercent).forEach((d, i) => {
-                const rag = getRAGStatus(d.sttAchPercent);
-                const width = Math.min(100, d.sttAchPercent).toFixed(2);
-                const gap = d.sttAchPercent - timeElapsedPercent;
+            dataArray.forEach((d, i) => {
+                const perc = d.sttAchPercent || 0;
+                const rag = getRAGStatus(perc);
+                const width = Math.min(100, perc).toFixed(2);
+                const gap = perc - timeElapsedPercent;
                 
+                const rank = d.nationalRank || (i + 1);
+
                 const item = document.createElement('div');
                 item.className = 'flex items-center text-sm';
                 item.innerHTML = `
                     <div class="w-1/4 truncate mr-4">
-                        <div class="font-bold text-gray-900 truncate">#${i+1} ${d[labelKey]}</div>
+                        <div class="font-bold text-gray-900 truncate">#${rank} ${d[labelKey]}</div>
                         <div class="text-xs text-gray-500 truncate">${d[subKey] || ''}</div>
                     </div>
                     <div class="w-3/4 bg-gray-200 rounded-full h-8 flex items-center relative">
                         <div class="absolute h-full w-[2px] bg-blue-500 border-l border-dashed border-blue-700 z-10" style="left: ${timeElapsedPercent}%"></div>
                         <div class="h-full rounded-full flex items-center justify-end pr-2 text-white font-bold text-xs ${rag.color}" style="width: ${width}%">
-                            ${d.sttAchPercent > 15 ? d.sttAchPercent.toFixed(1) + '%' : ''}
+                            ${perc > 15 ? perc.toFixed(1) + '%' : ''}
                         </div>
                         <span class="absolute right-2 text-xs font-bold ${gap >= 0 ? 'text-green-600' : 'text-red-600'}">GAP: ${gap > 0 ? '+' : ''}${gap.toFixed(2)}%</span>
-                         ${d.sttAchPercent <= 15 ? `<span class="absolute left-2 text-xs font-bold ${rag.textColor}">${d.sttAchPercent.toFixed(1)}%</span>` : ''}
+                         ${perc <= 15 ? `<span class="absolute left-2 text-xs font-bold ${rag.textColor}">${perc.toFixed(1)}%</span>` : ''}
                     </div>
                 `;
                 container.appendChild(item);
@@ -949,15 +916,14 @@
         function populateTerritoryChart(data) { createBarChart('stt-chart', data, 'territory', 'tm'); }
         function populateDbChart(data) { createBarChart('db-stt-chart', data, 'dhName', 'territory'); }
         function populateTopBottomSrCharts(data) {
-            // Sort full data
-            const sorted = [...data].sort((a,b) => b.sttAchPercent - a.sttAchPercent);
+            const sorted = [...(data || [])].sort((a,b) => (b.sttAchPercent || 0) - (a.sttAchPercent || 0));
             createBarChart('top-10-sr-chart', sorted.slice(0, 10), 'dffName', 'dhName');
             createBarChart('bottom-10-sr-chart', sorted.slice(-10).reverse(), 'dffName', 'dhName');
         }
 
         function updateSrStatus(data) {
-            const status = { green: 0, amber: 0, red: 0, total: data.length };
-            data.forEach(d => {
+            const status = { green: 0, amber: 0, red: 0, total: (data || []).length };
+            (data || []).forEach(d => {
                 const s = getRAGStatus(d.sttAchPercent).text;
                 if(s==='Green') status.green++; else if(s==='Amber') status.amber++; else status.red++;
             });
@@ -965,8 +931,8 @@
         }
 
         function updateDbStatus(data) {
-            const status = { green: 0, amber: 0, red: 0, total: data.length };
-            data.forEach(d => {
+            const status = { green: 0, amber: 0, red: 0, total: (data || []).length };
+            (data || []).forEach(d => {
                 const s = getRAGStatus(d.sttAchPercent).text;
                 if(s==='Green') status.green++; else if(s==='Amber') status.amber++; else status.red++;
             });
@@ -977,7 +943,6 @@
             const gp = s.total > 0 ? (s.green/s.total)*100 : 0;
             const ap = s.total > 0 ? (s.amber/s.total)*100 : 0;
             const rp = s.total > 0 ? (s.red/s.total)*100 : 0;
-            
             document.getElementById(id).innerHTML = `
                 <h3 class="text-md font-semibold text-gray-700 mb-2">${label} Status (Total: ${s.total})</h3>
                 <div class="flex h-6 rounded-full overflow-hidden text-xs font-semibold">
@@ -993,7 +958,6 @@
             `;
         }
 
-        // Initialize Everything
         initDashboard();
         initializeTabs();
         initializeTrendButtons();
@@ -1001,4 +965,3 @@
     </script>
 </body>
 </html>
-
